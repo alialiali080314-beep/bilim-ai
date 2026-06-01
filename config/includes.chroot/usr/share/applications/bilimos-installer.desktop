@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Установить BilimOS
+Name[ru]=Установить BilimOS
+Name[en]=Install BilimOS
+Comment=Install BilimOS to your hard drive
+Comment[ru]=Установить BilimOS на жёсткий диск
+Exec=sudo /usr/local/bin/bilimos-installer
+Icon=system-software-install
+Terminal=true
+Type=Application
+Categories=System;
+X-Ubuntu-Getdeb-Section=System
+StartupNotify=true

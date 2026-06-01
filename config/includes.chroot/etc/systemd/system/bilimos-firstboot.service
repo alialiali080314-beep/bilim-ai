@@ -1,0 +1,13 @@
+[Unit]
+Description=BilimOS First Boot Setup
+After=network.target
+ConditionPathExists=!/var/lib/bilimos/firstboot-done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/bilimos-firstboot
+ExecStartPost=/bin/bash -c "mkdir -p /var/lib/bilimos && touch /var/lib/bilimos/firstboot-done"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

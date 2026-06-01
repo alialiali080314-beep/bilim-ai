@@ -1,0 +1,41 @@
+# BilimOS — Core Applications
+firefox-esr
+libreoffice
+vlc
+gimp
+inkscape
+thunderbird
+transmission-gtk
+
+# System tools
+gparted
+synaptic
+timeshift
+htop
+neofetch
+curl
+wget
+git
+zip
+unzip
+p7zip-full
+software-properties-gtk
+
+# Multimedia codecs
+ffmpeg
+gstreamer1.0-plugins-good
+gstreamer1.0-plugins-bad
+gstreamer1.0-plugins-ugly
+gstreamer1.0-libav
+
+# Fonts
+fonts-liberation
+fonts-freefont-ttf
+fonts-dejavu
+fonts-noto
+fonts-noto-cjk
+
+# Russian/Kazakh language support
+language-pack-ru
+language-pack-gnome-ru
+locales

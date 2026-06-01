@@ -1,0 +1,38 @@
+#!/bin/bash
+# BilimOS — Configure default live user
+
+set -e
+
+LIVE_USER="bilim"
+LIVE_PASS="bilimos"
+
+# Create user if not exists
+if ! id "$LIVE_USER" &>/dev/null; then
+    useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev,cdrom,bluetooth "$LIVE_USER"
+fi
+
+# Set password
+echo "${LIVE_USER}:${LIVE_PASS}" | chpasswd
+
+# Sudo without password for live session
+echo "${LIVE_USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/bilimos-live
+chmod 440 /etc/sudoers.d/bilimos-live
+
+# Auto-login via GDM
+mkdir -p /etc/gdm3
+cat > /etc/gdm3/custom.conf <<EOF
+[daemon]
+AutomaticLoginEnable=true
+AutomaticLogin=${LIVE_USER}
+TimedLoginEnable=false
+
+[security]
+[xdmcp]
+[chooser]
+[debug]
+EOF
+
+# User directories
+su - "$LIVE_USER" -c "mkdir -p ~/Desktop ~/Documents ~/Downloads ~/Music ~/Pictures ~/Videos"
+
+echo "Live user '${LIVE_USER}' configured. Password: ${LIVE_PASS}"

@@ -1,0 +1,69 @@
+#!/bin/bash
+# BilimOS — Apply custom branding to the live system
+
+set -e
+
+OS_NAME="BilimOS"
+OS_VERSION="1.0"
+OS_CODENAME="Ziyat"
+OS_ID="bilimos"
+
+# /etc/os-release
+cat > /etc/os-release <<EOF
+NAME="${OS_NAME}"
+VERSION="${OS_VERSION} (${OS_CODENAME})"
+ID=${OS_ID}
+ID_LIKE=debian
+PRETTY_NAME="${OS_NAME} ${OS_VERSION} ${OS_CODENAME}"
+VERSION_ID="${OS_VERSION}"
+HOME_URL="https://bilimos.org"
+SUPPORT_URL="https://bilimos.org/support"
+BUG_REPORT_URL="https://bilimos.org/bugs"
+VERSION_CODENAME=${OS_CODENAME,,}
+EOF
+
+# /etc/lsb-release (for legacy compatibility)
+cat > /etc/lsb-release <<EOF
+DISTRIB_ID=${OS_NAME}
+DISTRIB_RELEASE=${OS_VERSION}
+DISTRIB_CODENAME=${OS_CODENAME,,}
+DISTRIB_DESCRIPTION="${OS_NAME} ${OS_VERSION} ${OS_CODENAME}"
+EOF
+
+# /etc/issue (login banner)
+cat > /etc/issue <<EOF
+${OS_NAME} ${OS_VERSION} \n \l
+EOF
+
+cat > /etc/issue.net <<EOF
+${OS_NAME} ${OS_VERSION}
+EOF
+
+# /etc/hostname
+echo "bilimos" > /etc/hostname
+
+# /etc/hosts
+cat > /etc/hosts <<EOF
+127.0.0.1   localhost
+127.0.1.1   bilimos
+::1         localhost ip6-localhost ip6-loopback
+ff02::1     ip6-allnodes
+ff02::2     ip6-allrouters
+EOF
+
+# MOTD (message of the day)
+cat > /etc/motd <<'EOF'
+
+  ██████╗ ██╗██╗     ██╗███╗   ███╗ ██████╗ ███████╗
+  ██╔══██╗██║██║     ██║████╗ ████║██╔═══██╗██╔════╝
+  ██████╔╝██║██║     ██║██╔████╔██║██║   ██║███████╗
+  ██╔══██╗██║██║     ██║██║╚██╔╝██║██║   ██║╚════██║
+  ██████╔╝██║███████╗██║██║ ╚═╝ ██║╚██████╔╝███████║
+  ╚═════╝ ╚═╝╚══════╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝
+
+  BilimOS 1.0 "Ziyat" — Знание без границ
+  Based on Debian Bookworm | https://bilimos.org
+
+EOF
+
+echo "BilimOS branding applied successfully."

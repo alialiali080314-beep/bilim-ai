@@ -1,0 +1,40 @@
+# BilimOS — System & Kernel packages
+linux-image-amd64
+linux-headers-amd64
+
+# Firmware
+firmware-linux
+firmware-linux-nonfree
+firmware-misc-nonfree
+firmware-iwlwifi
+firmware-realtek
+firmware-atheros
+firmware-brcm80211
+amd64-microcode
+intel-microcode
+
+# Boot
+grub-pc
+grub-efi-amd64
+os-prober
+efibootmgr
+
+# Network
+network-manager
+network-manager-gnome
+wpasupplicant
+wireless-tools
+bluetooth
+bluez
+blueman
+
+# Printing
+cups
+cups-filters
+system-config-printer
+hplip
+
+# Power management
+tlp
+powertop
+acpid
