@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BilimOS — Linux в браузере</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+    --border: #30363d; --accent: #e94560;
+    --text: #e6edf3; --muted: #8b949e;
+    --green: #3fb950; --yellow: #d29922;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text);
+    font-family: system-ui, sans-serif; font-size: 13px; overflow: hidden; }
+
+/* Topbar */
+.topbar { height: 46px; background: var(--bg2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 14px; gap: 12px;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10; }
+.logo { font-weight: 700; font-size: 15px; color: var(--accent); }
+.logo span { color: var(--muted); font-size: 11px; font-weight: 400; margin-left: 6px; }
+.topbar-status { flex: 1; text-align: center; color: var(--muted); font-size: 12px; }
+.topbar-right { display: flex; gap: 6px; }
+.tbtn { background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;
+    transition: border-color .15s, color .15s; }
+.tbtn:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+.tbtn:disabled { opacity: .35; cursor: not-allowed; }
+.tbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tbtn.primary:hover { opacity: .85; }
+
+/* Layout */
+.workspace { display: flex; height: calc(100vh - 46px); margin-top: 46px; }
+
+/* Sidebar */
+.sidebar { width: 210px; background: var(--bg2); border-right: 1px solid var(--border);
+    padding: 10px; display: flex; flex-direction: column; gap: 10px;
+    overflow-y: auto; flex-shrink: 0; }
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.card { background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 7px; }
+.card-title { font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--muted); padding-bottom: 5px;
+    border-bottom: 1px solid var(--border); }
+.row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.row b { color: var(--text); font-weight: 500; }
+.badge { padding: 1px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.off  { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.run  { background: #3fb95020; color: var(--green); border: 1px solid #3fb95050; }
+.load { background: #d2992220; color: var(--yellow); border: 1px solid #d2992250; }
+label.lbl { display: flex; flex-direction: column; gap: 3px;
+    font-size: 11px; color: var(--muted); }
+label.lbl input, label.lbl select {
+    background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text); padding: 4px 6px; border-radius: 4px; font-size: 12px; }
+label.lbl input[type=range] { padding: 0; accent-color: var(--accent); }
+.btn { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg2); color: var(--text); cursor: pointer; font-size: 12px;
+    transition: border-color .15s; }
+.btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+textarea.clip { width: 100%; background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text); padding: 5px; border-radius: 4px; font-size: 11px;
+    resize: none; font-family: monospace; }
+textarea.clip:focus { outline: none; border-color: var(--accent); }
+
+/* VM area */
+.vm-area { flex: 1; background: #000; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; }
+
+/* Splash */
+.splash { display: flex; flex-direction: column; align-items: center;
+    gap: 24px; padding: 32px 20px; text-align: center; }
+.ascii { font-family: monospace; font-size: clamp(5px, 1.1vw, 10px);
+    line-height: 1.2; color: var(--accent); white-space: pre; }
+.splash p { color: var(--muted); font-size: 13px; line-height: 1.8; }
+.splash strong { color: var(--text); }
+.reqs { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+.req { padding: 5px 12px; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 20px; font-size: 11px; color: var(--muted); }
+.req.ok   { border-color: #3fb95060; color: var(--green); }
+.req.fail { border-color: #f8514960; color: #f85149; }
+
+/* Screen */
+#screen_container { width: 100%; height: 100%; display: none;
+    align-items: center; justify-content: center; background: #000; cursor: crosshair; }
+#screen_container canvas { image-rendering: pixelated;
+    max-width: 100%; max-height: calc(100% - 26px); display: block; }
+
+/* Progress */
+.prog-wrap { display: none; flex-direction: column; align-items: center; gap: 12px; }
+.prog-title { font-size: 14px; }
+.prog-track { width: 300px; height: 5px; background: var(--bg3);
+    border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+.prog-bar { height: 100%; width: 0; background: linear-gradient(90deg,#0f3460,var(--accent));
+    border-radius: 3px; transition: width .2s; }
+.prog-info { font-size: 11px; color: var(--muted); }
+
+/* Statusbar */
+.statusbar { position: absolute; bottom: 0; left: 0; right: 0; height: 22px;
+    background: #00000099; border-top: 1px solid var(--border);
+    display: none; align-items: center; padding: 0 12px; gap: 0;
+    font-size: 11px; color: var(--muted); backdrop-filter: blur(4px); }
+.sep { margin: 0 10px; opacity: .3; }
+
+/* Fullscreen */
+:fullscreen .topbar, :fullscreen .sidebar { display: none; }
+:fullscreen .workspace { margin-top: 0; height: 100vh; }
+
+@media (max-width: 580px) {
+    .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; height: auto;
+        border-right: none; border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .card { min-width: 160px; flex: 1; }
+    .workspace { flex-direction: column; overflow-y: auto; height: auto; }
+    .vm-area { min-height: 55vw; }
+    .ascii { font-size: 3.5px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+    <div class="logo">BilimOS <span>1.0 "Ziyat"</span></div>
+    <div class="topbar-status" id="st">Готов к запуску</div>
+    <div class="topbar-right">
+        <button class="tbtn primary" id="btnStart">▶ Запустить</button>
+        <button class="tbtn" id="btnStop"    disabled>■ Стоп</button>
+        <button class="tbtn" id="btnRestart" disabled>↺</button>
+        <button class="tbtn" id="btnFs">⛶</button>
+        <button class="tbtn" id="btnShot"    disabled>📷</button>
+    </div>
+</header>
+
+<div class="workspace">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="card">
+            <div class="card-title">Статус</div>
+            <div class="row"><span>Ядро</span><b>x86 32-bit</b></div>
+            <div class="row"><span>RAM</span><b id="iRam">256 МБ</b></div>
+            <div class="row"><span>Время</span><b id="iUp">0:00</b></div>
+            <div class="row"><span>Статус</span><span class="badge off" id="iBadge">Выкл</span></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Настройки</div>
+            <label class="lbl">Память
+                <input type="range" id="cfgRam" min="128" max="512" value="256" step="128">
+                <span id="cfgRamLbl">256 МБ</span>
+            </label>
+            <label class="lbl">Профиль
+                <select id="cfgProfile">
+                    <option value="buildroot">Buildroot Lite (быстро)</option>
+                    <option value="debian" selected>Debian (BilimOS)</option>
+                    <option value="alpine">Alpine Linux</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Клавиши</div>
+            <button class="btn" id="btnCAD" disabled>Ctrl+Alt+Del</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Отправить текст в ВМ</div>
+            <textarea class="clip" id="clip" rows="3" placeholder="Вставь текст → Отправить"></textarea>
+            <button class="btn" id="btnClip" disabled>↓ Отправить</button>
+        </div>
+
+    </aside>
+
+    <!-- VM -->
+    <section class="vm-area">
+
+        <div class="splash" id="splash">
+            <pre class="ascii">  ██████╗ ██╗██╗     ██╗███╗   ███╗ ██████╗ ███████╗
+  ██╔══██╗██║██║     ██║████╗ ████║██╔═══██╗██╔════╝
+  ██████╔╝██║██║     ██║██╔████╔██║██║   ██║███████╗
+  ██╔══██╗██║██║     ██║██║╚██╔╝██║██║   ██║╚════██║
+  ██████╔╝██║███████╗██║██║ ╚═╝ ██║╚██████╔╝███████║
+  ╚═════╝ ╚═╝╚══════╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝</pre>
+            <p>Нажми <strong>▶ Запустить</strong> — Linux загрузится прямо в браузере</p>
+            <div class="reqs">
+                <div class="req" id="rWasm">… WebAssembly</div>
+                <div class="req" id="rMem">… Память</div>
+            </div>
+        </div>
+
+        <div id="screen_container">
+            <div style="white-space:pre;font-family:monospace;font-size:13px" id="screen_text"></div>
+            <canvas id="vga_canvas"></canvas>
+        </div>
+
+        <div class="prog-wrap" id="prog">
+            <div class="prog-title" id="progTitle">Загрузка образа...</div>
+            <div class="prog-track"><div class="prog-bar" id="progBar"></div></div>
+            <div class="prog-info" id="progInfo">0 МБ</div>
+        </div>
+
+        <div class="statusbar" id="statusbar">
+            <span id="sbState">Загрузка...</span>
+            <span class="sep">|</span>
+            <span id="sbCpu">CPU: –</span>
+            <span class="sep">|</span>
+            <span>Кликни на экран для ввода</span>
+        </div>
+
+    </section>
+</div>
+
+<!-- v86 (WebAssembly x86 эмулятор) -->
+<script src="https://cdn.jsdelivr.net/gh/copy/v86@master/build/libv86.js"></script>
+<script>
+"use strict";
+
+// ── Профили образов ────────────────────────────────────────────────────────
+const PROFILES = {
+    buildroot: {
+        bzimage: "https://copy.sh/v86/images/buildroot-bzimage.bin",
+        mem: 128,
+    },
+    debian: {
+        bzimage: "https://copy.sh/v86/images/buildroot-bzimage.bin",
+        hda:     "https://copy.sh/v86/images/debian-9p-rootfs-flat.img",
+        mem: 256,
+    },
+    alpine: {
+        cdrom: "https://copy.sh/v86/images/alpine-x86-3.12.0.iso",
+        mem: 256,
+    },
+};
+
+const BIOS    = "https://copy.sh/v86/bios/seabios.bin";
+const VGABIOS = "https://copy.sh/v86/bios/vgabios.bin";
+
+// ── DOM ────────────────────────────────────────────────────────────────────
+const g = id => document.getElementById(id);
+let vm = null, uptimer = null, upsec = 0;
+
+// ── Проверка совместимости ─────────────────────────────────────────────────
+function chkReq(id, ok, label) {
+    const el = g(id);
+    el.className = "req " + (ok ? "ok" : "fail");
+    el.textContent = (ok ? "✓ " : "✗ ") + label;
+}
+chkReq("rWasm", typeof WebAssembly !== "undefined", "WebAssembly");
+chkReq("rMem",  (navigator.deviceMemory || 4) >= 1, "Память");
+if (typeof WebAssembly === "undefined") g("btnStart").disabled = true;
+
+// ── RAM slider ─────────────────────────────────────────────────────────────
+g("cfgRam").oninput = function() {
+    g("cfgRamLbl").textContent = this.value + " МБ";
+    g("iRam").textContent = this.value + " МБ";
+};
+
+// ── Утилиты ────────────────────────────────────────────────────────────────
+function setSt(msg)   { g("st").textContent = msg; }
+function setBadge(s, label) {
+    const b = g("iBadge");
+    b.className = "badge " + s;
+    b.textContent = label;
+}
+function setVMButtons(on) {
+    g("btnStop").disabled    = !on;
+    g("btnRestart").disabled = !on;
+    g("btnCAD").disabled     = !on;
+    g("btnClip").disabled    = !on;
+    g("btnShot").disabled    = !on;
+    g("btnStart").disabled   = on;
+    g("cfgRam").disabled     = on;
+    g("cfgProfile").disabled = on;
+}
+function startUptime() {
+    upsec = 0;
+    uptimer = setInterval(() => {
+        upsec++;
+        g("iUp").textContent = Math.floor(upsec/60) + ":" + String(upsec%60).padStart(2,"0");
+    }, 1000);
+}
+
+// ── Запуск ─────────────────────────────────────────────────────────────────
+g("btnStart").onclick = function() {
+    const profile = PROFILES[g("cfgProfile").value];
+    const ram = parseInt(g("cfgRam").value);
+
+    g("splash").style.display = "none";
+    g("prog").style.display   = "flex";
+    g("statusbar").style.display = "flex";
+    setSt("Загрузка образа...");
+    setBadge("load", "Загрузка");
+    setVMButtons(true);
+
+    const cfg = {
+        wasm_path: "https://cdn.jsdelivr.net/gh/copy/v86@master/build/v86.wasm",
+        memory_size:     ram * 1024 * 1024,
+        vga_memory_size: 8   * 1024 * 1024,
+        screen_container: g("screen_container"),
+        bios:     { url: BIOS    },
+        vga_bios: { url: VGABIOS },
+        autostart: true,
+        acpi: true,
+    };
+    if (profile.bzimage) cfg.bzimage = { url: profile.bzimage };
+    if (profile.hda)     cfg.hda     = { url: profile.hda, async: true, size: 0 };
+    if (profile.cdrom)   cfg.cdrom   = { url: profile.cdrom, async: true, size: 0 };
+
+    try { vm = new V86(cfg); }
+    catch(e) { setSt("Ошибка: " + e.message); setBadge("off","Ошибка"); setVMButtons(false); return; }
+
+    vm.add_listener("download_progress", ev => {
+        if (ev.total) {
+            const pct = Math.round(ev.loaded / ev.total * 100);
+            g("progBar").style.width = pct + "%";
+            g("progInfo").textContent =
+                (ev.loaded/1048576).toFixed(1) + " МБ / " + (ev.total/1048576).toFixed(1) + " МБ";
+        }
+    });
+
+    vm.add_listener("emulator-ready", () => {
+        g("prog").style.display = "none";
+        g("screen_container").style.display = "flex";
+        setSt("BilimOS запускается...");
+        g("sbState").textContent = "Загрузка ядра...";
+        setBadge("run", "Работает");
+        startUptime();
+    });
+
+    vm.add_listener("screen-set-mode", m => {
+        g("sbState").textContent = m === "text" ? "Текстовый режим" : "Графический режим";
+        if (m !== "text") setSt("BilimOS работает");
+    });
+
+    vm.add_listener("emulator-stopped", () => {
+        setSt("Остановлена"); setBadge("off","Выкл"); setVMButtons(false);
+        clearInterval(uptimer);
+    });
+};
+
+// ── Стоп ───────────────────────────────────────────────────────────────────
+g("btnStop").onclick = function() {
+    if (!vm) return;
+    vm.stop(); vm = null;
+    g("screen_container").style.display = "none";
+    g("splash").style.display = "flex";
+    g("statusbar").style.display = "none";
+    g("prog").style.display = "none";
+    setSt("Готов к запуску"); setBadge("off","Выкл");
+    setVMButtons(false); clearInterval(uptimer);
+    g("iUp").textContent = "0:00";
+};
+
+// ── Перезагрузка ───────────────────────────────────────────────────────────
+g("btnRestart").onclick = () => { if (vm) { vm.restart(); upsec = 0; } };
+
+// ── Ctrl+Alt+Del ───────────────────────────────────────────────────────────
+g("btnCAD").onclick = () => {
+    if (!vm) return;
+    vm.keyboard_send_scancodes([0x1d,0x38,0x53,0xd3,0xb8,0x9d]);
+};
+
+// ── Отправить текст в ВМ ───────────────────────────────────────────────────
+g("btnClip").onclick = () => {
+    const t = g("clip").value;
+    if (vm && t) { vm.keyboard_send_text(t); g("clip").value = ""; }
+};
+
+// ── Скриншот ───────────────────────────────────────────────────────────────
+g("btnShot").onclick = () => {
+    const c = document.getElementById("vga_canvas");
+    if (!c) return;
+    const a = document.createElement("a");
+    a.download = "bilimos.png"; a.href = c.toDataURL(); a.click();
+};
+
+// ── Полный экран ───────────────────────────────────────────────────────────
+g("btnFs").onclick = () => {
+    if (!document.fullscreenElement)
+        document.documentElement.requestFullscreen?.();
+    else
+        document.exitFullscreen?.();
+};
+</script>
+</body>
+</html>
