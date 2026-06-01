@@ -20,11 +20,29 @@
 | Версия | 1.0 "Ziyat" |
 | База | Debian 12 Bookworm |
 | Рабочий стол | GNOME (тёмная тема) |
-| Загрузчик | GRUB 2 (UEFI + BIOS) |
-| Архитектура | x86_64 (amd64) |
+| Загрузчик | GRUB 2 (UEFI) |
+| Архитектура | **ARM64** (aarch64) |
 | Язык по умолчанию | Русский (ru_RU.UTF-8) |
 | Часовой пояс | Asia/Almaty |
 | Live-пользователь | bilim / bilimos |
+
+## Платформы
+
+| Устройство | Способ запуска |
+|------------|----------------|
+| ПК / Mac (ARM) | Прямая загрузка с USB / ISO |
+| **iPhone / iPad** | **UTM (App Store) → Virtualize → ARM64** |
+| Mac (Apple Silicon) | UTM / Parallels / VMware Fusion |
+| Android | QEMU / Andronix (ARM64) |
+| QEMU на Linux/Mac | `./scripts/test-in-qemu.sh` |
+
+## Запуск на iPhone
+
+1. Собрать ISO: `./build.sh`
+2. Скопировать `iso-build/bilimos-1.0-arm64.iso` на iPhone (iCloud / AirDrop / кабель)
+3. В **UTM**: `+` → **Virtualize** → Linux → выбрать ISO → RAM 2–4 ГБ → Save → ▶
+
+Подробная инструкция: [docs/IPHONE-UTM.md](docs/IPHONE-UTM.md)
 
 ## Что включено
 
@@ -39,34 +57,34 @@
 - VLC — медиаплеер
 - GIMP — редактор изображений
 - Thunderbird — почтовый клиент
-- GParted — утилита работы с разделами
+- GParted — разметка дисков
 - Timeshift — резервное копирование
 
 **Система**
-- Полная поддержка Wi-Fi / Bluetooth / принтеров
+- Поддержка Wi-Fi / Bluetooth / принтеров
 - Мультимедиа-кодеки (MP3, MP4, AAC, H.264...)
 - Поддержка русского и казахского языков
-- Автоматическая установка через графический инсталлятор
+- Интерактивный установщик на диск
 
 ## Быстрый старт
 
 ```bash
-# Собрать ISO
+# Собрать ARM64 ISO
 ./build.sh
 
-# Записать на USB
-./scripts/create-usb.sh
-
-# Протестировать в QEMU
+# Тест в QEMU (aarch64)
 ./scripts/test-in-qemu.sh
+
+# Записать на USB (для ARM-устройств)
+./scripts/create-usb.sh
 ```
 
-Полная документация: [docs/BUILD.md](docs/BUILD.md)
+Документация по сборке: [docs/BUILD.md](docs/BUILD.md)
 
 ## Установка
 
 При загрузке с ISO запустите **«Установить BilimOS»** с рабочего стола.  
-Инсталлятор проведёт через разметку диска, создание пользователя и установку GRUB.
+В UTM: диск будет называться `vda`.
 
 ## Структура репозитория
 
@@ -77,10 +95,12 @@ bilim-ai/
 │   ├── package-lists/    # Списки пакетов
 │   ├── hooks/            # Сборочные хуки
 │   ├── includes.chroot/  # Файлы системы
-│   └── bootloaders/      # GRUB / isolinux
+│   └── bootloaders/      # GRUB EFI (arm64)
 ├── branding/             # Обои и иконки
-├── scripts/              # Утилиты (USB, QEMU)
-├── docs/                 # Документация
+├── scripts/              # Утилиты (USB, QEMU aarch64)
+├── docs/
+│   ├── BUILD.md          # Руководство по сборке
+│   └── IPHONE-UTM.md     # Запуск на iPhone через UTM
 └── iso-build/            # Готовый ISO (после сборки)
 ```
 

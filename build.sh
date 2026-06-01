@@ -22,7 +22,7 @@ info()  { echo -e "${BLUE}[INFO]${NC} $*"; }
 
 check_dependencies() {
     log "Checking build dependencies..."
-    local deps=(live-build debootstrap squashfs-tools xorriso isolinux grub-pc-bin grub-efi-amd64-bin)
+    local deps=(live-build debootstrap squashfs-tools xorriso grub-efi-arm64-bin qemu-user-static binfmt-support)
     local missing=()
 
     for dep in "${deps[@]}"; do
@@ -56,15 +56,16 @@ configure_build() {
     cd "$BUILD_DIR"
 
     lb config \
+        --architecture arm64 \
         --distribution bookworm \
         --archive-areas "main contrib non-free non-free-firmware" \
-        --binary-image iso-hybrid \
-        --bootloader "syslinux,grub-efi" \
+        --binary-image iso \
+        --bootloader grub-efi \
         --debian-installer false \
         --memtest none \
         --iso-application "BilimOS" \
         --iso-publisher "BilimOS Project" \
-        --iso-volume "BILIMOS_1_0" \
+        --iso-volume "BILIMOS_1_0_ARM64" \
         --system live \
         --username bilim \
         --hostname bilimos \
@@ -92,15 +93,15 @@ build_iso() {
     fi
 
     mkdir -p "$ISO_DIR"
-    cp "$iso_file" "${ISO_DIR}/bilimos-1.0-amd64.iso"
-    log "ISO created: ${ISO_DIR}/bilimos-1.0-amd64.iso"
+    cp "$iso_file" "${ISO_DIR}/bilimos-1.0-arm64.iso"
+    log "ISO created: ${ISO_DIR}/bilimos-1.0-arm64.iso"
 
     local iso_size
-    iso_size=$(du -sh "${ISO_DIR}/bilimos-1.0-amd64.iso" | cut -f1)
+    iso_size=$(du -sh "${ISO_DIR}/bilimos-1.0-arm64.iso" | cut -f1)
     log "ISO size: $iso_size"
 
-    md5sum "${ISO_DIR}/bilimos-1.0-amd64.iso" > "${ISO_DIR}/bilimos-1.0-amd64.iso.md5"
-    sha256sum "${ISO_DIR}/bilimos-1.0-amd64.iso" > "${ISO_DIR}/bilimos-1.0-amd64.iso.sha256"
+    md5sum "${ISO_DIR}/bilimos-1.0-arm64.iso" > "${ISO_DIR}/bilimos-1.0-arm64.iso.md5"
+    sha256sum "${ISO_DIR}/bilimos-1.0-arm64.iso" > "${ISO_DIR}/bilimos-1.0-arm64.iso.sha256"
     log "Checksums generated."
 }
 

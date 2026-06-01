@@ -190,8 +190,9 @@ EOF
         mount --bind "/$dir" "${MOUNT_POINT}/$dir"
     done
 
-    chroot "$MOUNT_POINT" grub-install --target=x86_64-efi \
+    chroot "$MOUNT_POINT" grub-install --target=arm64-efi \
         --efi-directory=/boot/efi --bootloader-id=BilimOS \
+        --no-nvram --removable \
         --recheck "$TARGET_DISK"
 
     chroot "$MOUNT_POINT" update-grub
