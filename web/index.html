@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BilimOS — Запуск в браузере</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <span class="logo-icon">⬡</span>
+            <span class="logo-text">BilimOS</span>
+            <span class="logo-version">1.0 "Ziyat"</span>
+        </div>
+        <div class="topbar-center" id="status-text">Готов к запуску</div>
+        <div class="topbar-right">
+            <button class="btn-icon" id="btn-fullscreen" title="Полный экран">⛶</button>
+            <button class="btn-icon" id="btn-screenshot" title="Снимок экрана">⬡</button>
+            <a class="btn-icon" href="https://github.com/alialiali080314-beep/bilim-ai" target="_blank" title="GitHub">⌥</a>
+        </div>
+    </header>
+
+    <!-- Основная область -->
+    <main class="workspace">
+
+        <!-- Боковая панель -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="section-title">Система</div>
+                <div class="info-row"><span>Ядро</span><span id="info-arch">x86 32-bit</span></div>
+                <div class="info-row"><span>RAM</span><span id="info-ram">512 МБ</span></div>
+                <div class="info-row"><span>Статус</span><span id="info-status" class="status-badge status-off">Выкл</span></div>
+                <div class="info-row"><span>Время</span><span id="info-uptime">0:00</span></div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">Конфигурация</div>
+                <label class="config-label">Память (МБ)
+                    <input type="range" id="cfg-ram" min="128" max="512" value="256" step="128">
+                    <span id="cfg-ram-val">256 МБ</span>
+                </label>
+                <label class="config-label">Дисплей
+                    <select id="cfg-display">
+                        <option value="960x600">960×600</option>
+                        <option value="800x600" selected>800×600</option>
+                        <option value="640x480">640×480</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">Управление</div>
+                <button class="btn-primary" id="btn-start">▶ Запустить</button>
+                <button class="btn-secondary" id="btn-stop" disabled>■ Остановить</button>
+                <button class="btn-secondary" id="btn-restart" disabled>↺ Перезагрузить</button>
+                <button class="btn-secondary" id="btn-send-ctrl-alt-del" disabled>Ctrl+Alt+Del</button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">Буфер обмена</div>
+                <textarea id="clipboard-area" placeholder="Вставь текст сюда и нажми ↓ чтобы отправить в ВМ" rows="3"></textarea>
+                <button class="btn-secondary" id="btn-send-text" disabled>↓ Отправить в ВМ</button>
+            </div>
+
+            <div class="sidebar-section about">
+                <div class="section-title">О системе</div>
+                <p>BilimOS работает прямо в браузере через v86 — эмулятор x86 на WebAssembly.</p>
+                <p>Дистрибутив: <b>Debian Bookworm</b></p>
+                <p>Рабочий стол: <b>GNOME</b></p>
+            </div>
+        </aside>
+
+        <!-- Экран ВМ -->
+        <section class="vm-area">
+            <!-- Заглушка до запуска -->
+            <div class="vm-splash" id="vm-splash">
+                <div class="splash-logo">
+                    <pre class="ascii-art">
+  ██████╗ ██╗██╗     ██╗███╗   ███╗ ██████╗ ███████╗
+  ██╔══██╗██║██║     ██║████╗ ████║██╔═══██╗██╔════╝
+  ██████╔╝██║██║     ██║██╔████╔██║██║   ██║███████╗
+  ██╔══██╗██║██║     ██║██║╚██╔╝██║██║   ██║╚════██║
+  ██████╔╝██║███████╗██║██║ ╚═╝ ██║╚██████╔╝███████║
+  ╚═════╝ ╚═╝╚══════╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝</pre>
+                    <p class="splash-subtitle">Знание без границ</p>
+                </div>
+                <div class="splash-info">
+                    <p>Нажмите <strong>«▶ Запустить»</strong> для загрузки BilimOS в браузере</p>
+                    <p class="splash-note">Используется v86 — эмулятор x86 на WebAssembly</p>
+                </div>
+                <div class="splash-requirements">
+                    <div class="req-item" id="req-wasm">
+                        <span class="req-icon">…</span> WebAssembly
+                    </div>
+                    <div class="req-item" id="req-mem">
+                        <span class="req-icon">…</span> Память браузера
+                    </div>
+                    <div class="req-item" id="req-net">
+                        <span class="req-icon">…</span> Загрузка образа
+                    </div>
+                </div>
+            </div>
+
+            <!-- Контейнер v86 -->
+            <div id="screen_container" class="screen-container" style="display:none;">
+                <div style="white-space:pre;font-family:monospace;font-size:14px" id="screen_text"></div>
+                <canvas id="vga_canvas"></canvas>
+            </div>
+
+            <!-- Прогресс загрузки образа -->
+            <div class="load-progress" id="load-progress" style="display:none;">
+                <div class="progress-title">Загрузка образа BilimOS...</div>
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-info" id="progress-info">0 МБ / ? МБ</div>
+            </div>
+
+            <!-- Статус-бар внизу экрана -->
+            <div class="vm-statusbar" id="vm-statusbar" style="display:none;">
+                <span id="sb-boot-state">Загрузка...</span>
+                <span class="sb-sep">|</span>
+                <span id="sb-cpu">CPU: 0%</span>
+                <span class="sb-sep">|</span>
+                <span>Нажми на экран для ввода</span>
+            </div>
+        </section>
+    </main>
+
+    <!-- v86 эмулятор -->
+    <script src="https://cdn.jsdelivr.net/gh/copy/v86@master/build/libv86.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
