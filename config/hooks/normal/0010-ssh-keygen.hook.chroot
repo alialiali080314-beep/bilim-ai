@@ -1,0 +1,8 @@
+#!/bin/bash
+# BilimOS — Regenerate SSH host keys on first boot (installed system)
+
+set -e
+
+if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+    dpkg-reconfigure openssh-server 2>/dev/null || true
+fi

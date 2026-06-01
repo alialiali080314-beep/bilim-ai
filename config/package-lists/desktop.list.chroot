@@ -1,0 +1,16 @@
+# BilimOS — Desktop Environment (GNOME)
+gnome-core
+gnome-tweaks
+gnome-shell-extensions
+gnome-terminal
+gnome-software
+gnome-system-monitor
+gnome-disk-utility
+gnome-calculator
+gnome-text-editor
+nautilus
+eog
+evince
+totem
+rhythmbox
+gedit

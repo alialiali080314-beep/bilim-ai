@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+# BilimOS Installer — Text-based interactive installer
+
+set -euo pipefail
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
+
+TARGET_DISK=""
+TARGET_PART_EFI=""
+TARGET_PART_ROOT=""
+HOSTNAME_NEW="bilimos"
+USERNAME_NEW="user"
+PASSWORD_NEW=""
+TIMEZONE_NEW="Asia/Almaty"
+
+title() {
+    clear
+    echo -e "${BLUE}${BOLD}"
+    echo "  ╔══════════════════════════════════════════════╗"
+    echo "  ║         BilimOS 1.0 Installer                ║"
+    echo "  ║         Знание без границ                     ║"
+    echo "  ╚══════════════════════════════════════════════╝"
+    echo -e "${NC}"
+}
+
+check_root() {
+    if [[ $EUID -ne 0 ]]; then
+        echo -e "${RED}This installer must be run as root (sudo).${NC}"
+        exit 1
+    fi
+}
+
+welcome_screen() {
+    title
+    echo -e "${CYAN}Welcome to BilimOS Installer!${NC}"
+    echo ""
+    echo "This will install BilimOS 1.0 \"Ziyat\" on your computer."
+    echo ""
+    echo -e "${YELLOW}WARNING: This process will ERASE data on the selected disk!${NC}"
+    echo ""
+    read -rp "Press ENTER to continue or Ctrl+C to cancel... "
+}
+
+select_disk() {
+    title
+    echo -e "${CYAN}Step 1: Select installation disk${NC}"
+    echo ""
+    echo "Available disks:"
+    echo ""
+    lsblk -d -o NAME,SIZE,MODEL,TYPE | grep disk | awk '{printf "  /dev/%-10s %s  %s\n", $1, $2, $3}'
+    echo ""
+    while true; do
+        read -rp "Enter disk (e.g. sda, nvme0n1): " disk_input
+        TARGET_DISK="/dev/${disk_input}"
+        if [[ -b "$TARGET_DISK" ]]; then
+            echo ""
+            echo -e "${YELLOW}You selected: ${TARGET_DISK}${NC}"
+            lsblk "$TARGET_DISK"
+            echo ""
+            read -rp "Confirm? All data on ${TARGET_DISK} will be erased! (yes/no): " confirm
+            [[ "$confirm" == "yes" ]] && break
+        else
+            echo -e "${RED}Invalid disk: ${TARGET_DISK}${NC}"
+        fi
+    done
+}
+
+partition_disk() {
+    title
+    echo -e "${CYAN}Step 2: Partitioning ${TARGET_DISK}${NC}"
+    echo ""
+    echo "Creating partition layout:"
+    echo "  - 512MB EFI partition (FAT32)"
+    echo "  - Remaining space: Root partition (ext4)"
+    echo ""
+    read -rp "Proceed with automatic partitioning? (yes/no): " confirm
+    [[ "$confirm" != "yes" ]] && { echo "Aborted."; exit 1; }
+
+    # Clear partition table
+    wipefs -af "$TARGET_DISK"
+    sgdisk --zap-all "$TARGET_DISK"
+    sleep 1
+
+    # Create GPT partition table
+    sgdisk -n 1:0:+512M -t 1:ef00 -c 1:"EFI System"  "$TARGET_DISK"
+    sgdisk -n 2:0:0     -t 2:8300 -c 2:"BilimOS Root" "$TARGET_DISK"
+    partprobe "$TARGET_DISK"
+    sleep 2
+
+    # Determine partition names
+    if [[ "$TARGET_DISK" == *"nvme"* ]]; then
+        TARGET_PART_EFI="${TARGET_DISK}p1"
+        TARGET_PART_ROOT="${TARGET_DISK}p2"
+    else
+        TARGET_PART_EFI="${TARGET_DISK}1"
+        TARGET_PART_ROOT="${TARGET_DISK}2"
+    fi
+
+    # Format partitions
+    mkfs.fat -F32 -n "BILIMOS_EFI" "$TARGET_PART_EFI"
+    mkfs.ext4 -L "BILIMOS_ROOT" -F "$TARGET_PART_ROOT"
+
+    echo -e "${GREEN}Partitioning complete.${NC}"
+    sleep 1
+}
+
+get_user_settings() {
+    title
+    echo -e "${CYAN}Step 3: User configuration${NC}"
+    echo ""
+
+    read -rp "Computer name (hostname) [bilimos]: " input
+    HOSTNAME_NEW="${input:-bilimos}"
+
+    read -rp "Your username [user]: " input
+    USERNAME_NEW="${input:-user}"
+
+    while true; do
+        read -rsp "Password: " PASSWORD_NEW; echo
+        read -rsp "Confirm password: " pass2; echo
+        [[ "$PASSWORD_NEW" == "$pass2" ]] && break
+        echo -e "${RED}Passwords do not match. Try again.${NC}"
+    done
+
+    echo ""
+    echo "Common timezones: Asia/Almaty, Asia/Tashkent, Europe/Moscow, Europe/Kiev, UTC"
+    read -rp "Timezone [Asia/Almaty]: " input
+    TIMEZONE_NEW="${input:-Asia/Almaty}"
+}
+
+install_system() {
+    title
+    echo -e "${CYAN}Step 4: Installing BilimOS...${NC}"
+    echo ""
+
+    local MOUNT_POINT="/mnt/bilimos-install"
+    mkdir -p "$MOUNT_POINT"
+
+    echo "[1/7] Mounting partitions..."
+    mount "$TARGET_PART_ROOT" "$MOUNT_POINT"
+    mkdir -p "${MOUNT_POINT}/boot/efi"
+    mount "$TARGET_PART_EFI" "${MOUNT_POINT}/boot/efi"
+
+    echo "[2/7] Copying live system to disk..."
+    rsync -aHAX --info=progress2 \
+        --exclude='/proc/*' --exclude='/sys/*' --exclude='/dev/*' \
+        --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' \
+        --exclude='/live' --exclude='/cdrom' \
+        / "${MOUNT_POINT}/"
+
+    echo "[3/7] Generating fstab..."
+    local root_uuid efi_uuid
+    root_uuid=$(blkid -s UUID -o value "$TARGET_PART_ROOT")
+    efi_uuid=$(blkid -s UUID -o value "$TARGET_PART_EFI")
+
+    cat > "${MOUNT_POINT}/etc/fstab" <<EOF
+# BilimOS fstab
+UUID=${root_uuid}  /         ext4  defaults,errors=remount-ro  0 1
+UUID=${efi_uuid}   /boot/efi vfat  umask=0077                  0 2
+tmpfs              /tmp      tmpfs defaults,nosuid,nodev        0 0
+EOF
+
+    echo "[4/7] Configuring system..."
+    echo "$HOSTNAME_NEW" > "${MOUNT_POINT}/etc/hostname"
+
+    cat > "${MOUNT_POINT}/etc/hosts" <<EOF
+127.0.0.1   localhost
+127.0.1.1   ${HOSTNAME_NEW}
+::1         localhost ip6-localhost ip6-loopback
+EOF
+
+    # Configure timezone
+    chroot "$MOUNT_POINT" ln -sf "/usr/share/zoneinfo/${TIMEZONE_NEW}" /etc/localtime
+    echo "$TIMEZONE_NEW" > "${MOUNT_POINT}/etc/timezone"
+
+    echo "[5/7] Creating user account..."
+    chroot "$MOUNT_POINT" useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev,cdrom,bluetooth "$USERNAME_NEW" 2>/dev/null || true
+    echo "${USERNAME_NEW}:${PASSWORD_NEW}" | chroot "$MOUNT_POINT" chpasswd
+    echo "${USERNAME_NEW} ALL=(ALL) ALL" > "${MOUNT_POINT}/etc/sudoers.d/${USERNAME_NEW}"
+
+    # Remove live-only configs
+    rm -f "${MOUNT_POINT}/etc/sudoers.d/bilimos-live"
+    rm -f "${MOUNT_POINT}/etc/gdm3/custom.conf"
+    # Remove live user
+    chroot "$MOUNT_POINT" userdel -r bilim 2>/dev/null || true
+
+    echo "[6/7] Installing bootloader (GRUB)..."
+    for dir in proc sys dev dev/pts; do
+        mount --bind "/$dir" "${MOUNT_POINT}/$dir"
+    done
+
+    chroot "$MOUNT_POINT" grub-install --target=arm64-efi \
+        --efi-directory=/boot/efi --bootloader-id=BilimOS \
+        --no-nvram --removable \
+        --recheck "$TARGET_DISK"
+
+    chroot "$MOUNT_POINT" update-grub
+
+    # Unmount bind mounts
+    for dir in dev/pts dev sys proc; do
+        umount "${MOUNT_POINT}/$dir" 2>/dev/null || true
+    done
+
+    echo "[7/7] Unmounting..."
+    umount "${MOUNT_POINT}/boot/efi"
+    umount "$MOUNT_POINT"
+
+    echo ""
+    echo -e "${GREEN}${BOLD}Installation complete!${NC}"
+    echo ""
+    echo -e "BilimOS has been installed on ${TARGET_DISK}."
+    echo -e "Username: ${CYAN}${USERNAME_NEW}${NC}"
+    echo -e "Hostname: ${CYAN}${HOSTNAME_NEW}${NC}"
+    echo ""
+    read -rp "Reboot now? (yes/no): " reboot_now
+    [[ "$reboot_now" == "yes" ]] && reboot
+}
+
+main() {
+    check_root
+    welcome_screen
+    select_disk
+    partition_disk
+    get_user_settings
+    install_system
+}
+
+main "$@"

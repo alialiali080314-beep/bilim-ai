@@ -1,0 +1,36 @@
+#!/bin/bash
+# BilimOS — Configure locale and keyboard
+
+set -e
+
+# Generate locales
+cat > /etc/locale.gen <<EOF
+en_US.UTF-8 UTF-8
+ru_RU.UTF-8 UTF-8
+kk_KZ.UTF-8 UTF-8
+EOF
+
+locale-gen
+
+# Set default locale
+cat > /etc/default/locale <<EOF
+LANG=ru_RU.UTF-8
+LANGUAGE=ru_RU:ru:en_US:en
+LC_ALL=ru_RU.UTF-8
+EOF
+
+# Keyboard layout
+cat > /etc/default/keyboard <<EOF
+XKBMODEL="pc105"
+XKBLAYOUT="ru,us"
+XKBVARIANT=","
+XKBOPTIONS="grp:alt_shift_toggle,grp_led:scroll"
+BACKSPACE="guess"
+EOF
+
+# Timezone
+ln -sf /usr/share/zoneinfo/Asia/Almaty /etc/localtime
+echo "Asia/Almaty" > /etc/timezone
+dpkg-reconfigure -f noninteractive tzdata 2>/dev/null || true
+
+echo "Locale and keyboard configured."

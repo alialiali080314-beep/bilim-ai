@@ -1,0 +1,36 @@
+# BilimOS — System & Kernel packages (ARM64)
+linux-image-arm64
+linux-headers-arm64
+
+# Firmware (ARM64 — без x86-микрокода)
+firmware-linux
+firmware-linux-nonfree
+firmware-misc-nonfree
+firmware-iwlwifi
+firmware-realtek
+firmware-atheros
+firmware-brcm80211
+
+# Boot (только EFI, без grub-pc — ARM64 требует UEFI)
+grub-efi-arm64
+os-prober
+efibootmgr
+
+# Network
+network-manager
+network-manager-gnome
+wpasupplicant
+wireless-tools
+bluetooth
+bluez
+blueman
+
+# Printing
+cups
+cups-filters
+system-config-printer
+
+# Power management
+tlp
+powertop
+acpid

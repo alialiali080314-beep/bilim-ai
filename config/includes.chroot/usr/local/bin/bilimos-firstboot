@@ -1,0 +1,39 @@
+#!/bin/bash
+# BilimOS — First boot initialization
+
+set -euo pipefail
+
+LOG="/var/log/bilimos-firstboot.log"
+exec > >(tee -a "$LOG") 2>&1
+
+echo "[$(date)] BilimOS first boot setup starting..."
+
+# Regenerate SSH host keys
+if dpkg -l openssh-server &>/dev/null; then
+    rm -f /etc/ssh/ssh_host_*
+    dpkg-reconfigure -f noninteractive openssh-server
+    echo "SSH host keys generated."
+fi
+
+# Resize root filesystem to fill partition
+ROOT_DEV=$(findmnt -n -o SOURCE /)
+resize2fs "$ROOT_DEV" 2>/dev/null || true
+echo "Filesystem expanded."
+
+# Enable TLP for power management
+systemctl enable tlp 2>/dev/null || true
+
+# Update dconf database
+dconf update 2>/dev/null || true
+
+# Set up swapfile (2GB)
+if [[ ! -f /swapfile ]]; then
+    fallocate -l 2G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo "/swapfile none swap sw 0 0" >> /etc/fstab
+    echo "Swapfile created."
+fi
+
+echo "[$(date)] BilimOS first boot setup complete."

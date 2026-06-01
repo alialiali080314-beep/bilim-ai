@@ -1,0 +1,10 @@
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=5
+GRUB_TIMEOUT_STYLE=menu
+GRUB_DISTRIBUTOR="BilimOS"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX="locale=ru_RU.UTF-8 keyboard-layouts=ru,en"
+GRUB_GFXMODE=1920x1080,auto
+GRUB_GFXPAYLOAD_LINUX=keep
+GRUB_TERMINAL=gfxterm
+GRUB_BACKGROUND="/usr/share/bilimos/grub-background.png"

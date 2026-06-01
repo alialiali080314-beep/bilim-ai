@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BilimOS — Linux в браузере</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;
+  --brd:#30363d;--acc:#e94560;
+  --txt:#e6edf3;--muted:#8b949e;
+  --grn:#3fb950;--ylw:#d29922;--red:#f85149;
+}
+html,body{height:100%;background:var(--bg);color:var(--txt);
+  font:13px/1.5 system-ui,sans-serif;overflow:hidden}
+
+/* ── topbar ── */
+.bar{height:46px;background:var(--bg2);border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;padding:0 14px;gap:10px;
+  position:fixed;top:0;left:0;right:0;z-index:9}
+.logo{font-weight:700;font-size:15px;color:var(--acc);white-space:nowrap}
+.logo em{color:var(--muted);font-size:11px;font-style:normal;margin-left:5px}
+.bar-st{flex:1;text-align:center;color:var(--muted);font-size:12px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-r{display:flex;gap:5px;flex-shrink:0}
+button{cursor:pointer;font:inherit}
+.b{padding:5px 11px;border-radius:6px;border:1px solid var(--brd);
+   background:var(--bg3);color:var(--txt);font-size:12px;
+   transition:border-color .15s,opacity .15s}
+.b:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+.b:disabled{opacity:.3;cursor:not-allowed}
+.b.go{background:var(--acc);border-color:var(--acc);color:#fff}
+.b.go:hover:not(:disabled){opacity:.85}
+
+/* ── layout ── */
+.wrap{display:flex;height:calc(100vh - 46px);margin-top:46px}
+
+/* ── sidebar ── */
+.side{width:200px;background:var(--bg2);border-right:1px solid var(--brd);
+  padding:10px;display:flex;flex-direction:column;gap:9px;
+  overflow-y:auto;flex-shrink:0}
+.side::-webkit-scrollbar{width:3px}
+.side::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px}
+.card{background:var(--bg3);border:1px solid var(--brd);border-radius:8px;
+  padding:9px;display:flex;flex-direction:column;gap:6px}
+.ct{font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--muted);padding-bottom:5px;
+  border-bottom:1px solid var(--brd)}
+.row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.row b{color:var(--txt);font-weight:500}
+.badge{padding:1px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.off{background:var(--bg);color:var(--muted);border:1px solid var(--brd)}
+.run{background:#3fb95020;color:var(--grn);border:1px solid #3fb95050}
+.load{background:#d2992220;color:var(--ylw);border:1px solid #d2992250}
+lbl-w{display:block}
+.lbl{display:flex;flex-direction:column;gap:3px;
+  font-size:11px;color:var(--muted);cursor:pointer}
+.lbl select,.lbl input[type=range]{
+  background:var(--bg2);border:1px solid var(--brd);
+  color:var(--txt);padding:3px 6px;border-radius:4px;font-size:12px}
+.lbl input[type=range]{padding:2px;accent-color:var(--acc)}
+.btn{width:100%;padding:6px;border-radius:6px;border:1px solid var(--brd);
+  background:var(--bg2);color:var(--txt);font-size:12px}
+.btn:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+textarea{width:100%;background:var(--bg2);border:1px solid var(--brd);
+  color:var(--txt);padding:5px;border-radius:4px;font:11px/1.4 monospace;resize:none}
+textarea:focus{outline:none;border-color:var(--acc)}
+
+/* ── vm area ── */
+.vm{flex:1;background:#000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+/* splash */
+.splash{display:flex;flex-direction:column;align-items:center;
+  gap:22px;padding:28px 16px;text-align:center}
+.ascii{font-family:monospace;font-size:clamp(4px,1vw,9px);
+  line-height:1.2;color:var(--acc);white-space:pre}
+.splash p{color:var(--muted);font-size:13px;line-height:1.8}
+.splash strong{color:var(--txt)}
+.tags{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tag{padding:4px 11px;background:var(--bg3);border:1px solid var(--brd);
+  border-radius:20px;font-size:11px;color:var(--muted)}
+.tag.ok{border-color:#3fb95060;color:var(--grn)}
+.tag.fail{border-color:#f8514960;color:var(--red)}
+
+/* warning banner */
+.warn-box{background:#d2992215;border:1px solid #d2992250;border-radius:8px;
+  padding:12px 16px;max-width:480px;text-align:left;font-size:12px;line-height:1.7}
+.warn-box .wt{color:var(--ylw);font-weight:700;margin-bottom:4px}
+.warn-box code{background:var(--bg3);padding:1px 5px;border-radius:4px;
+  font-family:monospace;font-size:11px}
+
+/* screen */
+#sc{width:100%;height:100%;display:none;
+  align-items:center;justify-content:center;background:#000;cursor:crosshair}
+#sc canvas{image-rendering:pixelated;max-width:100%;max-height:calc(100% - 24px)}
+
+/* progress */
+.prg{display:none;flex-direction:column;align-items:center;gap:11px;padding:24px}
+.prg-t{font-size:13px;color:var(--txt)}
+.prg-track{width:280px;height:5px;background:var(--bg3);border-radius:3px;
+  overflow:hidden;border:1px solid var(--brd)}
+.prg-bar{height:100%;width:0;background:linear-gradient(90deg,#0f3460,var(--acc));
+  border-radius:3px;transition:width .3s}
+.prg-info{font-size:11px;color:var(--muted)}
+
+/* spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:28px;height:28px;border:3px solid var(--brd);
+  border-top-color:var(--acc);border-radius:50%;
+  animation:spin .8s linear infinite}
+
+/* statusbar */
+.sbar{position:absolute;bottom:0;left:0;right:0;height:22px;
+  background:#000000aa;border-top:1px solid var(--brd);display:none;
+  align-items:center;padding:0 12px;gap:0;font-size:11px;color:var(--muted)}
+.sep{margin:0 8px;opacity:.3}
+
+/* fullscreen */
+:fullscreen .bar,:fullscreen .side{display:none}
+:fullscreen .wrap{margin-top:0;height:100vh}
+
+@media(max-width:560px){
+  .side{width:100%;flex-direction:row;flex-wrap:wrap;
+    height:auto;border-right:none;border-bottom:1px solid var(--brd);overflow-x:auto}
+  .card{min-width:150px;flex:1}
+  .wrap{flex-direction:column;overflow-y:auto;height:auto}
+  .vm{min-height:55vw}
+  .ascii{font-size:3px}
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="logo">BilimOS <em>1.0 "Ziyat"</em></div>
+  <div class="bar-st" id="st">Готов к запуску</div>
+  <div class="bar-r">
+    <button class="b go" id="bStart">▶ Запустить</button>
+    <button class="b" id="bStop"    disabled>■ Стоп</button>
+    <button class="b" id="bRestart" disabled>↺</button>
+    <button class="b" id="bFs">⛶</button>
+    <button class="b" id="bShot"    disabled>📷</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <aside class="side">
+    <div class="card">
+      <div class="ct">Статус</div>
+      <div class="row"><span>Ядро</span><b>x86 32-bit</b></div>
+      <div class="row"><span>RAM</span><b id="iRam">256 МБ</b></div>
+      <div class="row"><span>Время</span><b id="iUp">0:00</b></div>
+      <div class="row"><span>Состояние</span>
+        <span class="badge off" id="iBadge">Выкл</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ct">Настройки</div>
+      <label class="lbl">Образ системы
+        <select id="cProf">
+          <option value="lite">Lite — быстрый старт</option>
+          <option value="debian" selected>Debian (BilimOS)</option>
+          <option value="alpine">Alpine Linux</option>
+        </select>
+      </label>
+      <label class="lbl">Память
+        <input type="range" id="cRam" min="128" max="512" value="256" step="128">
+        <span id="cRamL">256 МБ</span>
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="ct">Управление</div>
+      <button class="btn" id="bCAD" disabled>Ctrl+Alt+Del</button>
+    </div>
+
+    <div class="card">
+      <div class="ct">Текст → ВМ</div>
+      <textarea id="clip" rows="3" placeholder="Вставь текст → Отправить"></textarea>
+      <button class="btn" id="bClip" disabled>↓ Отправить</button>
+    </div>
+  </aside>
+
+  <section class="vm">
+
+    <div class="splash" id="splash">
+      <pre class="ascii">  ██████╗ ██╗██╗     ██╗███╗   ███╗ ██████╗ ███████╗
+  ██╔══██╗██║██║     ██║████╗ ████║██╔═══██╗██╔════╝
+  ██████╔╝██║██║     ██║██╔████╔██║██║   ██║███████╗
+  ██╔══██╗██║██║     ██║██║╚██╔╝██║██║   ██║╚════██║
+  ██████╔╝██║███████╗██║██║ ╚═╝ ██║╚██████╔╝███████║
+  ╚═════╝ ╚═╝╚══════╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝</pre>
+
+      <!-- предупреждение если открыт с диска -->
+      <div class="warn-box" id="warnFile" style="display:none">
+        <div class="wt">⚠ Файл открыт напрямую с диска</div>
+        Браузер блокирует загрузку ресурсов из <code>file://</code>.<br>
+        Нужно открыть через HTTP-сервер. Два простых варианта:<br><br>
+        <b>1. Загрузи на netlify.com</b> (бесплатно, 30 сек):<br>
+        Открой <code>netlify.com</code> → перетащи этот HTML-файл на страницу.<br><br>
+        <b>2. Локальный сервер</b> (если есть Python):<br>
+        <code>python3 -m http.server 8080</code><br>
+        затем открой <code>http://localhost:8080/bilimos.html</code>
+      </div>
+
+      <p id="splashHint">Нажми <strong>▶ Запустить</strong> — Linux загрузится в браузере</p>
+      <div class="tags">
+        <div class="tag" id="tWasm">… WebAssembly</div>
+        <div class="tag" id="tNet">… Сеть</div>
+      </div>
+    </div>
+
+    <div id="sc">
+      <div style="white-space:pre;font-family:monospace;font-size:13px" id="screen_text"></div>
+      <canvas id="vga_canvas"></canvas>
+    </div>
+
+    <div class="prg" id="prg">
+      <div class="spin"></div>
+      <div class="prg-t" id="prgT">Загрузка v86...</div>
+      <div class="prg-track"><div class="prg-bar" id="prgB"></div></div>
+      <div class="prg-info" id="prgI"></div>
+    </div>
+
+    <div class="sbar" id="sbar">
+      <span id="sbState">Запуск...</span>
+      <span class="sep">|</span>
+      <span id="sbCpu">CPU: –</span>
+      <span class="sep">|</span>
+      <span>Кликни на экран для ввода</span>
+    </div>
+
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ── Конфиг образов (серверы copy.sh — публичный CORS) ─────────────────────
+var BASE   = "https://copy.sh/v86";
+var BIOS   = BASE + "/bios/seabios.bin";
+var VGAB   = BASE + "/bios/vgabios.bin";
+var WASM   = BASE + "/build/v86.wasm";
+
+var PROFILES = {
+  lite:   { bzimage: BASE+"/images/buildroot-bzimage.bin", mem:128 },
+  debian: { bzimage: BASE+"/images/buildroot-bzimage.bin",
+            hda:     BASE+"/images/debian-9p-rootfs-flat.img", mem:256 },
+  alpine: { cdrom:   BASE+"/images/alpine-x86-3.12.0.iso", mem:256 },
+};
+
+// ── DOM ────────────────────────────────────────────────────────────────────
+function g(id){ return document.getElementById(id); }
+
+var vm=null, utimer=null, usec=0;
+
+// ── Проверки ───────────────────────────────────────────────────────────────
+var isFile = location.protocol === "file:";
+var hasWasm = typeof WebAssembly !== "undefined";
+
+setTag("tWasm", hasWasm, "WebAssembly");
+setTag("tNet",  !isFile, "HTTP-сервер");
+
+if(isFile){
+  g("warnFile").style.display = "block";
+  g("splashHint").style.display = "none";
+  g("bStart").disabled = true;
+}
+if(!hasWasm) g("bStart").disabled = true;
+
+function setTag(id, ok, label){
+  var el = g(id);
+  el.className = "tag " + (ok?"ok":"fail");
+  el.textContent = (ok?"✓ ":"✗ ") + label;
+}
+
+// ── RAM slider ─────────────────────────────────────────────────────────────
+g("cRam").oninput = function(){
+  g("cRamL").textContent = this.value + " МБ";
+  g("iRam").textContent  = this.value + " МБ";
+};
+
+// ── Утилиты ────────────────────────────────────────────────────────────────
+function setSt(t){ g("st").textContent = t; }
+function setBadge(cls,label){
+  var b = g("iBadge");
+  b.className = "badge "+cls;
+  b.textContent = label;
+}
+function setVM(on){
+  ["bStop","bRestart","bCAD","bClip","bShot"].forEach(function(id){
+    g(id).disabled = !on;
+  });
+  g("bStart").disabled = on;
+  g("cRam").disabled   = on;
+  g("cProf").disabled  = on;
+}
+function tick(){
+  usec++;
+  g("iUp").textContent = Math.floor(usec/60)+":"+("0"+usec%60).slice(-2);
+}
+
+// ── Динамическая загрузка v86 ──────────────────────────────────────────────
+function loadScript(src, cb){
+  var s = document.createElement("script");
+  s.src = src;
+  s.onload = cb;
+  s.onerror = function(){ showErr("Не удалось загрузить v86. Проверь интернет-соединение."); };
+  document.head.appendChild(s);
+}
+
+// ── Запуск ─────────────────────────────────────────────────────────────────
+g("bStart").onclick = function(){
+  g("splash").style.display = "none";
+  g("prg").style.display    = "flex";
+  g("sbar").style.display   = "flex";
+  setSt("Загрузка эмулятора v86...");
+  setBadge("load","Загрузка");
+  setVM(true);
+
+  // Сначала грузим библиотеку v86, потом запускаем
+  loadScript(BASE+"/build/libv86.js", function(){ startVM(); });
+};
+
+function startVM(){
+  var prof = PROFILES[g("cProf").value];
+  var ram  = parseInt(g("cRam").value);
+
+  g("prgT").textContent = "Загрузка образа Linux...";
+  setSt("Загрузка образа...");
+
+  var cfg = {
+    wasm_path:       WASM,
+    memory_size:     ram * 1024 * 1024,
+    vga_memory_size: 8   * 1024 * 1024,
+    screen_container: g("sc"),
+    bios:     { url: BIOS },
+    vga_bios: { url: VGAB },
+    autostart: true,
+    acpi: true,
+  };
+  if(prof.bzimage) cfg.bzimage = { url: prof.bzimage };
+  if(prof.hda)     cfg.hda     = { url: prof.hda, async: true, size: 0 };
+  if(prof.cdrom)   cfg.cdrom   = { url: prof.cdrom, async: true, size: 0 };
+
+  try{ vm = new V86(cfg); }
+  catch(e){ showErr("Ошибка запуска: " + e.message); return; }
+
+  vm.add_listener("download_progress", function(ev){
+    if(ev.total){
+      var pct = Math.round(ev.loaded/ev.total*100);
+      g("prgB").style.width = pct + "%";
+      g("prgI").textContent =
+        (ev.loaded/1048576).toFixed(1)+" МБ / "+(ev.total/1048576).toFixed(1)+" МБ";
+    }
+  });
+
+  vm.add_listener("emulator-ready", function(){
+    g("prg").style.display = "none";
+    g("sc").style.display  = "flex";
+    setSt("BilimOS запускается...");
+    g("sbState").textContent = "Загрузка ядра...";
+    setBadge("run","Работает");
+    usec = 0;
+    utimer = setInterval(tick, 1000);
+  });
+
+  vm.add_listener("screen-set-mode", function(m){
+    g("sbState").textContent = m==="text" ? "Текстовый режим" : "Графика";
+    if(m!=="text") setSt("BilimOS работает");
+  });
+
+  vm.add_listener("emulator-stopped", function(){
+    setSt("Остановлена"); setBadge("off","Выкл");
+    setVM(false); clearInterval(utimer);
+  });
+}
+
+function showErr(msg){
+  setSt("Ошибка"); setBadge("off","Ошибка"); setVM(false);
+  g("prg").style.display    = "none";
+  g("splash").style.display = "flex";
+  g("splashHint").textContent = "⚠ " + msg;
+  g("splashHint").style.color = "var(--red)";
+  g("splashHint").style.display = "block";
+}
+
+// ── Кнопки ─────────────────────────────────────────────────────────────────
+g("bStop").onclick = function(){
+  if(!vm) return;
+  vm.stop(); vm = null;
+  clearInterval(utimer);
+  g("sc").style.display     = "none";
+  g("splash").style.display = "flex";
+  g("sbar").style.display   = "none";
+  g("warnFile").style.display = isFile ? "block" : "none";
+  g("splashHint").textContent = "Нажми ▶ Запустить — Linux загрузится в браузере";
+  g("splashHint").style.color = "";
+  g("splashHint").style.display = isFile ? "none" : "block";
+  setSt("Готов к запуску"); setBadge("off","Выкл");
+  setVM(false); g("iUp").textContent = "0:00";
+};
+
+g("bRestart").onclick = function(){ if(vm){ vm.restart(); usec=0; } };
+
+g("bCAD").onclick = function(){
+  if(!vm) return;
+  vm.keyboard_send_scancodes([0x1d,0x38,0x53,0xd3,0xb8,0x9d]);
+};
+
+g("bClip").onclick = function(){
+  var t = g("clip").value;
+  if(vm && t){ vm.keyboard_send_text(t); g("clip").value = ""; }
+};
+
+g("bFs").onclick = function(){
+  if(!document.fullscreenElement)
+    document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  else
+    document.exitFullscreen && document.exitFullscreen();
+};
+
+g("bShot").onclick = function(){
+  var c = document.getElementById("vga_canvas");
+  if(!c) return;
+  var a = document.createElement("a");
+  a.download = "bilimos.png"; a.href = c.toDataURL(); a.click();
+};
+
+})();
+</script>
+</body>
+</html>
