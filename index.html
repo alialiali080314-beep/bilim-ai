@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BilimAI — Освой ИИ и зарабатывай больше</title>
+  <meta name="description" content="Лучшая платформа для изучения ИИ-инструментов. Курсы, автоматизация, заработок с ИИ." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #7c3aed;
+      --purple-light: #a855f7;
+      --blue: #2563eb;
+      --cyan: #06b6d4;
+      --dark: #0f0f1a;
+      --dark2: #16162a;
+      --dark3: #1e1e35;
+      --card: #1a1a2e;
+      --border: rgba(124,58,237,0.25);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --white: #ffffff;
+      --green: #10b981;
+      --gold: #f59e0b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(15,15,26,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.4rem; font-weight: 800; color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 0.9rem;
+      font-weight: 500; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .btn-ghost {
+      padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); font-size: 0.875rem;
+      font-weight: 500; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .btn-ghost:hover { border-color: var(--purple-light); color: var(--white); }
+    .btn-primary {
+      padding: 9px 20px; border-radius: 8px; border: none;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: var(--white); font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 25px rgba(124,58,237,0.4); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,58,237,0.35) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(6,182,212,0.15) 0%, transparent 50%);
+    }
+    .hero-grid {
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(124,58,237,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.07) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 800px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.4);
+      border-radius: 100px; padding: 6px 16px; margin-bottom: 28px;
+      font-size: 0.8rem; font-weight: 600; color: var(--purple-light);
+    }
+    .hero-badge::before { content: '✦'; color: var(--gold); }
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-weight: 900; line-height: 1.1;
+      color: var(--white); margin-bottom: 24px;
+    }
+    h1 .gradient-text {
+      background: linear-gradient(135deg, var(--purple-light), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 1.15rem; color: var(--muted); max-width: 560px;
+      margin: 0 auto 40px; line-height: 1.7;
+    }
+    .hero-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .btn-hero {
+      padding: 14px 32px; border-radius: 12px; font-size: 1rem;
+      font-weight: 700; cursor: pointer; transition: all 0.25s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-hero-main {
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: var(--white); border: none;
+      box-shadow: 0 0 40px rgba(124,58,237,0.4);
+    }
+    .btn-hero-main:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124,58,237,0.5); }
+    .btn-hero-sec {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-hero-sec:hover { background: rgba(255,255,255,0.1); border-color: rgba(124,58,237,0.5); }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 48px;
+      margin-top: 64px; flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 800; color: var(--white); }
+    .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── SECTIONS ─── */
+    section { padding: 96px 24px; }
+    .section-label {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--purple-light); margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800;
+      color: var(--white); line-height: 1.2; margin-bottom: 16px;
+    }
+    .section-sub { font-size: 1.05rem; color: var(--muted); max-width: 560px; line-height: 1.7; }
+    .container { max-width: 1160px; margin: 0 auto; }
+    .text-center { text-align: center; }
+    .text-center .section-sub { margin: 0 auto; }
+
+    /* ─── LOGOS ─── */
+    .logos-section {
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--dark2);
+    }
+    .logos-label { text-align: center; font-size: 0.8rem; color: var(--muted); margin-bottom: 28px; letter-spacing: 0.05em; }
+    .logos-row {
+      display: flex; justify-content: center; align-items: center;
+      gap: 40px; flex-wrap: wrap;
+    }
+    .logo-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 100px; padding: 8px 20px;
+      font-size: 0.85rem; font-weight: 600; color: var(--muted);
+      transition: all 0.2s;
+    }
+    .logo-pill:hover { color: var(--white); border-color: var(--purple-light); }
+    .logo-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ─── FEATURES ─── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; margin-top: 60px;
+    }
+    .feature-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px;
+      transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; inset: 0; border-radius: 20px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .feature-title { font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+    .feature-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
+
+    /* ─── COURSES ─── */
+    .courses-section { background: var(--dark2); }
+    .courses-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px; margin-top: 60px;
+    }
+    .course-card {
+      background: var(--dark3); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden; transition: all 0.3s;
+    }
+    .course-card:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+    .course-thumb {
+      height: 180px; display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem; position: relative; overflow: hidden;
+    }
+    .course-body { padding: 24px; }
+    .course-meta {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .course-tag {
+      font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 100px; letter-spacing: 0.04em;
+    }
+    .tag-hot { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .tag-new { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .tag-bestseller { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+    .course-level { font-size: 0.75rem; color: var(--muted); }
+    .course-title { font-size: 1.05rem; font-weight: 700; color: var(--white); margin-bottom: 8px; line-height: 1.4; }
+    .course-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+    .course-stats { display: flex; gap: 16px; margin-bottom: 20px; }
+    .course-stat { font-size: 0.8rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .course-footer { display: flex; align-items: center; justify-content: space-between; }
+    .course-price { font-size: 1.4rem; font-weight: 800; color: var(--white); }
+    .course-price span { font-size: 0.85rem; color: var(--muted); text-decoration: line-through; margin-left: 6px; font-weight: 400; }
+    .btn-course {
+      padding: 10px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: var(--white); border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-course:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ─── TOOLS ─── */
+    .tools-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px; margin-top: 56px;
+    }
+    .tool-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: all 0.2s; cursor: pointer; text-decoration: none;
+    }
+    .tool-card:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-3px); }
+    .tool-icon { font-size: 1.8rem; }
+    .tool-name { font-size: 0.95rem; font-weight: 700; color: var(--white); }
+    .tool-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .tool-commission {
+      font-size: 0.75rem; font-weight: 700; color: var(--green);
+      background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 6px; padding: 3px 8px; align-self: flex-start;
+    }
+
+    /* ─── PRICING ─── */
+    .pricing-section { background: var(--dark2); }
+    .pricing-toggle {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin: 32px 0 56px;
+    }
+    .toggle-label { font-size: 0.9rem; color: var(--muted); }
+    .toggle-switch {
+      width: 52px; height: 28px; background: var(--purple); border-radius: 100px;
+      position: relative; cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-switch::after {
+      content: ''; position: absolute; top: 4px; left: 4px;
+      width: 20px; height: 20px; background: white; border-radius: 50%;
+      transition: transform 0.2s; transform: translateX(24px);
+    }
+    .discount-badge {
+      background: rgba(16,185,129,0.15); color: var(--green);
+      border: 1px solid rgba(16,185,129,0.3); border-radius: 100px;
+      font-size: 0.75rem; font-weight: 700; padding: 3px 10px;
+    }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; max-width: 960px; margin: 0 auto;
+    }
+    .price-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 24px; padding: 36px; position: relative; overflow: hidden;
+    }
+    .price-card.featured {
+      border-color: var(--purple);
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(37,99,235,0.1));
+    }
+    .price-card.featured::before {
+      content: 'ПОПУЛЯРНЫЙ';
+      position: absolute; top: 20px; right: -30px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em;
+      padding: 5px 40px; transform: rotate(35deg);
+    }
+    .plan-name { font-size: 0.85rem; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+    .plan-price { font-size: 3rem; font-weight: 900; color: var(--white); line-height: 1; margin-bottom: 4px; }
+    .plan-price sup { font-size: 1.2rem; font-weight: 600; }
+    .plan-period { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
+    .plan-desc { font-size: 0.9rem; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+    .plan-features { list-style: none; margin-bottom: 32px; }
+    .plan-features li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 0.9rem; color: var(--text); margin-bottom: 12px;
+    }
+    .plan-features li .check { color: var(--green); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .plan-features li .cross { color: #475569; font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .btn-plan {
+      width: 100%; padding: 13px; border-radius: 12px; font-size: 0.95rem;
+      font-weight: 700; cursor: pointer; transition: all 0.2s; border: none;
+    }
+    .btn-plan-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-plan-outline:hover { border-color: var(--purple-light); color: var(--white); }
+    .btn-plan-filled {
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white; box-shadow: 0 0 30px rgba(124,58,237,0.3);
+    }
+    .btn-plan-filled:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(124,58,237,0.5); }
+
+    /* ─── TESTIMONIALS ─── */
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; margin-top: 60px;
+    }
+    .testimonial {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 28px;
+    }
+    .stars { color: var(--gold); font-size: 0.9rem; margin-bottom: 14px; letter-spacing: 2px; }
+    .testimonial-text { font-size: 0.95rem; color: var(--text); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 700; flex-shrink: 0;
+    }
+    .author-name { font-size: 0.9rem; font-weight: 700; color: var(--white); }
+    .author-role { font-size: 0.78rem; color: var(--muted); }
+    .author-earn { font-size: 0.8rem; color: var(--green); font-weight: 600; margin-top: 2px; }
+
+    /* ─── NEWSLETTER ─── */
+    .newsletter-section {
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(37,99,235,0.15));
+      border-top: 1px solid rgba(124,58,237,0.3);
+      border-bottom: 1px solid rgba(124,58,237,0.3);
+    }
+    .newsletter-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+      max-width: 900px; margin: 0 auto;
+    }
+    .newsletter-perks { list-style: none; margin-top: 20px; }
+    .newsletter-perks li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.9rem; color: var(--text); margin-bottom: 10px;
+    }
+    .newsletter-perks li::before { content: '→'; color: var(--purple-light); font-weight: 700; }
+    .newsletter-form { display: flex; flex-direction: column; gap: 14px; }
+    .input-field {
+      width: 100%; padding: 13px 16px; border-radius: 10px;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: var(--white); font-size: 0.9rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field::placeholder { color: var(--muted); }
+    .input-field:focus { border-color: var(--purple-light); }
+    .btn-subscribe {
+      width: 100%; padding: 13px; border-radius: 10px; border: none;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-subscribe:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(124,58,237,0.4); }
+    .form-note { font-size: 0.75rem; color: var(--muted); text-align: center; }
+
+    /* ─── HOW IT WORKS ─── */
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0; margin-top: 60px; position: relative;
+    }
+    .step {
+      text-align: center; padding: 32px 24px; position: relative;
+    }
+    .step-num {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white; font-size: 1.4rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; position: relative; z-index: 1;
+    }
+    .step-title { font-size: 1.05rem; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+    .step-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+    /* ─── CTA ─── */
+    .cta-section {
+      text-align: center; padding: 100px 24px;
+      background: var(--dark2);
+    }
+    .cta-card {
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.1));
+      border: 1px solid rgba(124,58,237,0.4); border-radius: 32px;
+      padding: 72px 40px; max-width: 700px; margin: 0 auto;
+      position: relative; overflow: hidden;
+    }
+    .cta-card::before {
+      content: ''; position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(ellipse at center, rgba(124,58,237,0.15) 0%, transparent 60%);
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+    }
+    .cta-card h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; color: var(--white); margin-bottom: 16px; position: relative; }
+    .cta-card p { font-size: 1.05rem; color: var(--muted); margin-bottom: 40px; line-height: 1.6; position: relative; }
+    .cta-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; position: relative; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--dark); border-top: 1px solid var(--border);
+      padding: 60px 24px 32px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px; max-width: 1160px; margin: 0 auto 48px;
+    }
+    .footer-brand p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-top: 14px; max-width: 280px; }
+    .footer-col h4 { font-size: 0.85rem; font-weight: 700; color: var(--white); margin-bottom: 16px; letter-spacing: 0.05em; }
+    .footer-col a {
+      display: block; font-size: 0.85rem; color: var(--muted);
+      text-decoration: none; margin-bottom: 10px; transition: color 0.2s;
+    }
+    .footer-col a:hover { color: var(--white); }
+    .footer-bottom {
+      max-width: 1160px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid var(--border); padding-top: 28px;
+      font-size: 0.82rem; color: var(--muted); flex-wrap: wrap; gap: 12px;
+    }
+    .footer-payment { display: flex; gap: 8px; }
+    .payment-icon {
+      padding: 4px 10px; background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.75rem; color: var(--muted);
+    }
+
+    /* ─── NOTIFICATION ─── */
+    .notification {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: var(--card); border: 1px solid var(--green);
+      border-radius: 14px; padding: 16px 20px; max-width: 320px;
+      display: flex; align-items: flex-start; gap: 12px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      animation: slide-in 0.4s ease; transform: translateX(400px);
+    }
+    .notification.show { transform: translateX(0); }
+    @keyframes slide-in { from { transform: translateX(400px); } to { transform: translateX(0); } }
+    .notif-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .notif-text { font-size: 0.85rem; color: var(--text); line-height: 1.5; }
+    .notif-name { font-weight: 700; color: var(--white); }
+    .notif-close {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-size: 1rem; flex-shrink: 0; padding: 0; margin-left: auto;
+    }
+
+    /* ─── MOBILE ─── */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; }
+
+    @media (max-width: 768px) {
+      .nav-links, .nav-actions .btn-ghost { display: none; }
+      .hamburger { display: flex; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .newsletter-inner { grid-template-columns: 1fr; }
+      .hero-stats { gap: 28px; }
+      .stat-num { font-size: 1.5rem; }
+    }
+    @media (max-width: 480px) {
+      .footer-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      nav { padding: 0 16px; }
+    }
+
+    /* ─── SCROLL ANIMATIONS ─── */
+    .fade-up {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── FLOATING PARTICLES ─── */
+    .particles { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+    .particle {
+      position: absolute; width: 3px; height: 3px;
+      background: var(--purple-light); border-radius: 50%;
+      animation: float-particle linear infinite;
+      opacity: 0;
+    }
+    @keyframes float-particle {
+      0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.3; }
+      100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">🧠</div>
+    BilimAI
+  </a>
+  <div class="nav-links">
+    <a href="#features">Возможности</a>
+    <a href="#courses">Курсы</a>
+    <a href="#tools">ИИ-инструменты</a>
+    <a href="#pricing">Цены</a>
+    <a href="#reviews">Отзывы</a>
+  </div>
+  <div class="nav-actions">
+    <a href="#" class="btn-ghost">Войти</a>
+    <a href="#pricing" class="btn-primary">Начать бесплатно →</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="particles" id="particles"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Платформа №1 для освоения ИИ в СНГ</div>
+    <h1>
+      Зарабатывай больше<br>
+      с помощью <span class="gradient-text">искусственного интеллекта</span>
+    </h1>
+    <p class="hero-sub">
+      Обучай себя мощным ИИ-инструментам, автоматизируй работу и зарабатывай
+      от $500/мес — даже без технического образования.
+    </p>
+    <div class="hero-actions">
+      <a href="#pricing" class="btn-hero btn-hero-main">
+        🚀 Начать бесплатно
+      </a>
+      <a href="#courses" class="btn-hero btn-hero-sec">
+        ▶ Посмотреть курсы
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">12,400+</div>
+        <div class="stat-label">Активных учеников</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">48</div>
+        <div class="stat-label">Курсов и мастер-классов</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">$870</div>
+        <div class="stat-label">Средний доход выпускника</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4.9 ★</div>
+        <div class="stat-label">Рейтинг платформы</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS -->
+<div class="logos-section">
+  <p class="logos-label">ИНСТРУМЕНТЫ, КОТОРЫЕ ВЫ ОСВОИТЕ</p>
+  <div class="logos-row">
+    <div class="logo-pill"><div class="dot" style="background:#10a37f"></div>ChatGPT</div>
+    <div class="logo-pill"><div class="dot" style="background:#cc785c"></div>Midjourney</div>
+    <div class="logo-pill"><div class="dot" style="background:#5436da"></div>Claude</div>
+    <div class="logo-pill"><div class="dot" style="background:#f0532d"></div>Make.com</div>
+    <div class="logo-pill"><div class="dot" style="background:#e44d26"></div>Zapier</div>
+    <div class="logo-pill"><div class="dot" style="background:#0ea5e9"></div>Notion AI</div>
+    <div class="logo-pill"><div class="dot" style="background:#7c3aed"></div>ElevenLabs</div>
+    <div class="logo-pill"><div class="dot" style="background:#f59e0b"></div>Runway ML</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="text-center fade-up">
+      <div class="section-label">Почему BilimAI</div>
+      <h2 class="section-title">Всё, что нужно для заработка<br>с ИИ в одном месте</h2>
+      <p class="section-sub">От новичка до профессионала — понятная дорожная карта, практические проекты и поддержка сообщества.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card fade-up">
+        <div class="feature-icon" style="background: rgba(124,58,237,0.15);">🎓</div>
+        <div class="feature-title">Структурированные курсы</div>
+        <div class="feature-desc">48 курсов от практикующих экспертов. Видео-уроки, задания, проверка работ и сертификаты.</div>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon" style="background: rgba(6,182,212,0.15);">⚡</div>
+        <div class="feature-title">Готовые шаблоны и промпты</div>
+        <div class="feature-desc">Библиотека из 500+ проверенных промптов и автоматизаций. Копируй и зарабатывай сразу.</div>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon" style="background: rgba(16,185,129,0.15);">💰</div>
+        <div class="feature-title">Монетизация с первого дня</div>
+        <div class="feature-desc">Пошаговые стратегии заработка: фриланс, продажа курсов, ИИ-агентства, партнёрки.</div>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon" style="background: rgba(245,158,11,0.15);">🤝</div>
+        <div class="feature-title">Живое сообщество</div>
+        <div class="feature-desc">Telegram-чат на 8,000+ участников. Нетворкинг, вакансии, коллаборации и поддержка.</div>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon" style="background: rgba(239,68,68,0.15);">🤖</div>
+        <div class="feature-title">ИИ-наставник 24/7</div>
+        <div class="feature-desc">Персональный ИИ-ассистент отвечает на вопросы, проверяет домашние задания и предлагает улучшения.</div>
+      </div>
+      <div class="feature-card fade-up">
+        <div class="feature-icon" style="background: rgba(124,58,237,0.15);">📊</div>
+        <div class="feature-title">Аналитика прогресса</div>
+        <div class="feature-desc">Дашборд с вашими достижениями, статистикой обучения и прогнозом заработка.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COURSES -->
+<section id="courses" class="courses-section">
+  <div class="container">
+    <div class="text-center fade-up">
+      <div class="section-label">Обучение</div>
+      <h2 class="section-title">Топ курсы платформы</h2>
+      <p class="section-sub">Практические курсы с реальными проектами. Получи навык и сразу начни зарабатывать.</p>
+    </div>
+    <div class="courses-grid">
+      <div class="course-card fade-up">
+        <div class="course-thumb" style="background: linear-gradient(135deg, #7c3aed22, #2563eb22);">🤖</div>
+        <div class="course-body">
+          <div class="course-meta">
+            <span class="course-tag tag-bestseller">БЕСТСЕЛЛЕР</span>
+            <span class="course-level">🟢 С нуля</span>
+          </div>
+          <div class="course-title">ChatGPT для заработка: полный курс</div>
+          <div class="course-desc">Освой ChatGPT от базовых промптов до создания ИИ-сервисов. 12 реальных кейсов заработка.</div>
+          <div class="course-stats">
+            <span class="course-stat">⭐ 4.9</span>
+            <span class="course-stat">👥 3,241 учеников</span>
+            <span class="course-stat">🕐 18 часов</span>
+          </div>
+          <div class="course-footer">
+            <div class="course-price">₸24,900 <span>₸49,800</span></div>
+            <button class="btn-course" onclick="addToCart(this)">Купить</button>
+          </div>
+        </div>
+      </div>
+      <div class="course-card fade-up">
+        <div class="course-thumb" style="background: linear-gradient(135deg, #06b6d422, #10b98122);">🎨</div>
+        <div class="course-body">
+          <div class="course-meta">
+            <span class="course-tag tag-hot">🔥 ГОРЯЧИЙ</span>
+            <span class="course-level">🟡 Средний</span>
+          </div>
+          <div class="course-title">Midjourney + ИИ-дизайн для бизнеса</div>
+          <div class="course-desc">Создавай профессиональный контент с ИИ. Продавай дизайн, логотипы и иллюстрации на биржах.</div>
+          <div class="course-stats">
+            <span class="course-stat">⭐ 4.8</span>
+            <span class="course-stat">👥 1,890 учеников</span>
+            <span class="course-stat">🕐 14 часов</span>
+          </div>
+          <div class="course-footer">
+            <div class="course-price">₸19,900 <span>₸39,800</span></div>
+            <button class="btn-course" onclick="addToCart(this)">Купить</button>
+          </div>
+        </div>
+      </div>
+      <div class="course-card fade-up">
+        <div class="course-thumb" style="background: linear-gradient(135deg, #f59e0b22, #ef444422);">⚙️</div>
+        <div class="course-body">
+          <div class="course-meta">
+            <span class="course-tag tag-new">✨ НОВЫЙ</span>
+            <span class="course-level">🟡 Средний</span>
+          </div>
+          <div class="course-title">Автоматизация бизнеса: Make + Zapier</div>
+          <div class="course-desc">Автоматизируй рутину без кода. Строй ИИ-агентства и бери проекты от $500 за автоматизацию.</div>
+          <div class="course-stats">
+            <span class="course-stat">⭐ 4.9</span>
+            <span class="course-stat">👥 987 учеников</span>
+            <span class="course-stat">🕐 22 часа</span>
+          </div>
+          <div class="course-footer">
+            <div class="course-price">₸29,900 <span>₸59,800</span></div>
+            <button class="btn-course" onclick="addToCart(this)">Купить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top: 40px;">
+      <a href="#" class="btn-ghost" style="font-size: 0.95rem; padding: 12px 28px;">Все 48 курсов →</a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="container">
+    <div class="text-center fade-up">
+      <div class="section-label">Как это работает</div>
+      <h2 class="section-title">От регистрации до первого заработка</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step fade-up">
+        <div class="step-num">1</div>
+        <div class="step-title">Регистрируйся бесплатно</div>
+        <div class="step-desc">Создай аккаунт за 30 секунд. Получи доступ к 5 бесплатным курсам и сообществу.</div>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">2</div>
+        <div class="step-title">Выбирай направление</div>
+        <div class="step-desc">Дизайн, копирайтинг, автоматизация, контент — выбери то, что тебе ближе.</div>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">3</div>
+        <div class="step-title">Учись на практике</div>
+        <div class="step-desc">Видео-уроки, шаблоны, реальные проекты. ИИ-наставник помогает в любое время.</div>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">4</div>
+        <div class="step-title">Зарабатывай</div>
+        <div class="step-desc">Применяй навыки сразу. Средний выпускник выходит на $500+ в месяц за 60 дней.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI TOOLS -->
+<section id="tools" style="background: var(--dark2);">
+  <div class="container">
+    <div class="fade-up">
+      <div class="section-label">Партнёрская программа</div>
+      <h2 class="section-title">Зарабатывай, рекомендуя ИИ-инструменты</h2>
+      <p class="section-sub">Подключайся к партнёрским программам топовых ИИ-сервисов и получай комиссии от 20% до 40% с каждой продажи.</p>
+    </div>
+    <div class="tools-grid">
+      <a href="#" class="tool-card fade-up">
+        <div class="tool-icon">🤖</div>
+        <div class="tool-name">ChatGPT Plus</div>
+        <div class="tool-desc">Реферальная программа для команд и бизнесов</div>
+        <div class="tool-commission">20% комиссия</div>
+      </a>
+      <a href="#" class="tool-card fade-up">
+        <div class="tool-icon">🎨</div>
+        <div class="tool-name">Midjourney</div>
+        <div class="tool-desc">Генерация изображений для дизайна и контента</div>
+        <div class="tool-commission">25% комиссия</div>
+      </a>
+      <a href="#" class="tool-card fade-up">
+        <div class="tool-icon">⚡</div>
+        <div class="tool-name">Make.com</div>
+        <div class="tool-desc">Автоматизация бизнес-процессов без кода</div>
+        <div class="tool-commission">30% комиссия</div>
+      </a>
+      <a href="#" class="tool-card fade-up">
+        <div class="tool-icon">🔊</div>
+        <div class="tool-name">ElevenLabs</div>
+        <div class="tool-desc">Клонирование голоса и синтез речи с ИИ</div>
+        <div class="tool-commission">22% комиссия</div>
+      </a>
+      <a href="#" class="tool-card fade-up">
+        <div class="tool-icon">🎬</div>
+        <div class="tool-name">Runway ML</div>
+        <div class="tool-desc">Генерация видео и монтаж с помощью ИИ</div>
+        <div class="tool-commission">25% комиссия</div>
+      </a>
+      <a href="#" class="tool-card fade-up">
+        <div class="tool-icon">📝</div>
+        <div class="tool-name">Jasper AI</div>
+        <div class="tool-desc">ИИ-копирайтинг и маркетинговые тексты</div>
+        <div class="tool-commission">30% комиссия</div>
+      </a>
+      <a href="#" class="tool-card fade-up">
+        <div class="tool-icon">🧠</div>
+        <div class="tool-name">Notion AI</div>
+        <div class="tool-desc">Умные заметки и управление проектами</div>
+        <div class="tool-commission">20% комиссия</div>
+      </a>
+      <a href="#" class="tool-card fade-up">
+        <div class="tool-icon">📊</div>
+        <div class="tool-name">Tableau AI</div>
+        <div class="tool-desc">Анализ данных и бизнес-аналитика с ИИ</div>
+        <div class="tool-commission">35% комиссия</div>
+      </a>
+    </div>
+    <div style="text-align:center; margin-top:40px;">
+      <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 20px;">Подключись к программе и начни зарабатывать на рекомендациях</p>
+      <a href="#pricing" class="btn-primary" style="padding: 12px 28px; font-size: 0.95rem; border-radius: 10px;">Стать партнёром →</a>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="pricing-section">
+  <div class="container">
+    <div class="text-center fade-up">
+      <div class="section-label">Тарифы</div>
+      <h2 class="section-title">Начни бесплатно, расти безлимитно</h2>
+      <p class="section-sub">Выбери план под свои цели. Отмени в любое время.</p>
+    </div>
+    <div class="pricing-toggle fade-up">
+      <span class="toggle-label">Ежемесячно</span>
+      <div class="toggle-switch" onclick="togglePricing(this)"></div>
+      <span class="toggle-label">Ежегодно</span>
+      <span class="discount-badge">Скидка 40%</span>
+    </div>
+    <div class="pricing-grid">
+      <!-- FREE -->
+      <div class="price-card fade-up">
+        <div class="plan-name">Старт</div>
+        <div class="plan-price"><sup>₸</sup>0</div>
+        <div class="plan-period">навсегда бесплатно</div>
+        <div class="plan-desc">Для тех, кто хочет попробовать и познакомиться с платформой.</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> 5 бесплатных курсов</li>
+          <li><span class="check">✓</span> Доступ к сообществу</li>
+          <li><span class="check">✓</span> 50 готовых промптов</li>
+          <li><span class="check">✓</span> ИИ-наставник: 10 запросов/день</li>
+          <li><span class="cross">✗</span> <span style="color:var(--muted)">Все курсы и мастер-классы</span></li>
+          <li><span class="cross">✗</span> <span style="color:var(--muted)">Партнёрская программа</span></li>
+          <li><span class="cross">✗</span> <span style="color:var(--muted)">Сертификаты</span></li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="signUp('free')">Начать бесплатно</button>
+      </div>
+      <!-- PRO -->
+      <div class="price-card featured fade-up">
+        <div class="plan-name">Про</div>
+        <div class="plan-price" id="pro-price"><sup>₸</sup>4,990</div>
+        <div class="plan-period" id="pro-period">в месяц</div>
+        <div class="plan-desc">Для тех, кто серьёзно хочет зарабатывать с ИИ.</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Все 48 курсов и мастер-классов</li>
+          <li><span class="check">✓</span> 500+ шаблонов и промптов</li>
+          <li><span class="check">✓</span> Безлимитный ИИ-наставник</li>
+          <li><span class="check">✓</span> Сертификаты об окончании</li>
+          <li><span class="check">✓</span> Партнёрская программа (20%)</li>
+          <li><span class="check">✓</span> Приоритетная поддержка</li>
+          <li><span class="check">✓</span> Новые курсы каждый месяц</li>
+        </ul>
+        <button class="btn-plan btn-plan-filled" onclick="signUp('pro')">Начать 7 дней бесплатно →</button>
+      </div>
+      <!-- BUSINESS -->
+      <div class="price-card fade-up">
+        <div class="plan-name">Бизнес</div>
+        <div class="plan-price" id="biz-price"><sup>₸</sup>14,900</div>
+        <div class="plan-period" id="biz-period">в месяц</div>
+        <div class="plan-desc">Для агентств, команд и серьёзного масштабирования.</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Всё из Про</li>
+          <li><span class="check">✓</span> До 10 пользователей</li>
+          <li><span class="check">✓</span> Партнёрская программа (40%)</li>
+          <li><span class="check">✓</span> 1-на-1 коучинг (4 сессии/мес)</li>
+          <li><span class="check">✓</span> Белый лейбл сертификатов</li>
+          <li><span class="check">✓</span> API доступ</li>
+          <li><span class="check">✓</span> Выделенный менеджер</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="signUp('business')">Связаться с нами</button>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:36px;">
+      <p style="font-size:0.85rem; color:var(--muted);">💳 Kaspi, Halyk Bank, Visa/Mastercard &nbsp;•&nbsp; 🔒 Безопасная оплата &nbsp;•&nbsp; ↩ Возврат за 30 дней</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="reviews">
+  <div class="container">
+    <div class="text-center fade-up">
+      <div class="section-label">Отзывы</div>
+      <h2 class="section-title">Наши ученики уже зарабатывают</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial fade-up">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-text">"Через 2 месяца после начала курса по ChatGPT я уволился с работы. Сейчас веду 5 клиентов по автоматизации бизнеса. BilimAI изменил мою жизнь."</div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg,#7c3aed,#2563eb);">А</div>
+          <div>
+            <div class="author-name">Азамат Сейткали</div>
+            <div class="author-role">ИИ-предприниматель, Алматы</div>
+            <div class="author-earn">💰 Зарабатывает $1,200/мес</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial fade-up">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-text">"Курс по Midjourney окупился за первую неделю. Продала 12 дизайнов на Shutterstock. Качество обучения — на голову выше других платформ."</div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg,#06b6d4,#10b981);">Г</div>
+          <div>
+            <div class="author-name">Гульнара Ахметова</div>
+            <div class="author-role">ИИ-дизайнер, Нур-Султан</div>
+            <div class="author-earn">💰 Зарабатывает $650/мес</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial fade-up">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-text">"Партнёрская программа — это вообще огонь. Рекомендую инструменты в своём Telegram-канале и получаю пассивный доход каждый месяц. Уже $340 только на рефералах."</div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background: linear-gradient(135deg,#f59e0b,#ef4444);">Д</div>
+          <div>
+            <div class="author-name">Дамир Касымов</div>
+            <div class="author-role">Контент-создатель, Шымкент</div>
+            <div class="author-earn">💰 Зарабатывает $340/мес (пассивно)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter-section">
+  <div class="container">
+    <div class="newsletter-inner">
+      <div class="fade-up">
+        <div class="section-label">Бесплатная рассылка</div>
+        <h2 class="section-title" style="font-size: 1.9rem;">Получай лучшие ИИ-инструменты каждую неделю</h2>
+        <ul class="newsletter-perks">
+          <li>Топ-5 новых ИИ-инструментов недели</li>
+          <li>Промпты для заработка от экспертов</li>
+          <li>Кейсы учеников с цифрами дохода</li>
+          <li>Эксклюзивные скидки на курсы</li>
+          <li>Уже 18,000+ подписчиков читают</li>
+        </ul>
+      </div>
+      <div class="fade-up">
+        <div style="background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px;">
+          <h3 style="color: var(--white); margin-bottom: 8px; font-size: 1.2rem;">🎁 + Бонус при подписке</h3>
+          <p style="color: var(--muted); font-size: 0.88rem; margin-bottom: 24px;">Получи PDF «100 лучших промптов для заработка» сразу после подписки</p>
+          <form class="newsletter-form" onsubmit="subscribeEmail(event)">
+            <input type="text" class="input-field" placeholder="Ваше имя" required />
+            <input type="email" class="input-field" placeholder="Email адрес" required />
+            <button type="submit" class="btn-subscribe">Подписаться и получить бонус →</button>
+          </form>
+          <p class="form-note" style="margin-top:12px;">🔒 Без спама. Отписаться можно в любой момент.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card fade-up">
+      <h2>Начни зарабатывать с ИИ уже сегодня</h2>
+      <p>Присоединись к 12,400 ученикам, которые уже освоили ИИ-инструменты и зарабатывают больше.</p>
+      <div class="cta-actions">
+        <a href="#pricing" class="btn-hero btn-hero-main">🚀 Начать бесплатно</a>
+        <a href="#courses" class="btn-hero btn-hero-sec">📚 Смотреть курсы</a>
+      </div>
+      <p style="margin-top: 24px; font-size: 0.82rem; color: var(--muted); position: relative;">✓ Без привязки карты &nbsp;•&nbsp; ✓ 7 дней Pro бесплатно &nbsp;•&nbsp; ✓ Отмена в 1 клик</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="margin-bottom: 4px; display: inline-flex;">
+        <div class="logo-icon">🧠</div>
+        BilimAI
+      </a>
+      <p>Платформа №1 для изучения ИИ-инструментов и монетизации навыков в СНГ. Учись, зарабатывай, масштабируйся.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Обучение</h4>
+      <a href="#">Все курсы</a>
+      <a href="#">Мастер-классы</a>
+      <a href="#">Шаблоны и промпты</a>
+      <a href="#">Сертификаты</a>
+      <a href="#">Дорожная карта</a>
+    </div>
+    <div class="footer-col">
+      <h4>Монетизация</h4>
+      <a href="#">Партнёрская программа</a>
+      <a href="#">ИИ-фриланс</a>
+      <a href="#">Продай свой курс</a>
+      <a href="#">Реферальная программа</a>
+      <a href="#">Кейсы заработка</a>
+    </div>
+    <div class="footer-col">
+      <h4>Компания</h4>
+      <a href="#">О нас</a>
+      <a href="#">Блог</a>
+      <a href="#">Карьера</a>
+      <a href="#">Контакты</a>
+      <a href="#">Политика конфиденциальности</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 BilimAI. Все права защищены.</span>
+    <div class="footer-payment">
+      <span class="payment-icon">Kaspi</span>
+      <span class="payment-icon">Halyk</span>
+      <span class="payment-icon">Visa</span>
+      <span class="payment-icon">MC</span>
+    </div>
+  </div>
+</footer>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification">
+  <div class="notif-icon">🎉</div>
+  <div class="notif-text" id="notif-text">
+    <span class="notif-name">Азамат из Алматы</span> только что купил курс ChatGPT
+  </div>
+  <button class="notif-close" onclick="closeNotif()">✕</button>
+</div>
+
+<script>
+  // Particles
+  function createParticles() {
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 20; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.animationDuration = (8 + Math.random() * 12) + 's';
+      p.style.animationDelay = (Math.random() * 10) + 's';
+      p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+      container.appendChild(p);
+    }
+  }
+  createParticles();
+
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Pricing toggle
+  let isAnnual = true;
+  function togglePricing(el) {
+    isAnnual = !isAnnual;
+    el.style.background = isAnnual ? 'var(--purple)' : '#334155';
+    el.style.setProperty('--x', isAnnual ? '24px' : '0px');
+    if (isAnnual) {
+      document.getElementById('pro-price').innerHTML = '<sup>₸</sup>2,990';
+      document.getElementById('pro-period').textContent = 'в месяц при оплате за год';
+      document.getElementById('biz-price').innerHTML = '<sup>₸</sup>8,990';
+      document.getElementById('biz-period').textContent = 'в месяц при оплате за год';
+    } else {
+      document.getElementById('pro-price').innerHTML = '<sup>₸</sup>4,990';
+      document.getElementById('pro-period').textContent = 'в месяц';
+      document.getElementById('biz-price').innerHTML = '<sup>₸</sup>14,900';
+      document.getElementById('biz-period').textContent = 'в месяц';
+    }
+  }
+
+  // Sign up
+  function signUp(plan) {
+    const msg = plan === 'free'
+      ? 'Регистрация! Создай аккаунт и начни бесплатно 🚀'
+      : plan === 'pro'
+      ? '7 дней Pro бесплатно! Введи данные карты — спишем только после пробного периода 💳'
+      : 'Свяжемся с вами в течение 24 часов для настройки бизнес-аккаунта 📞';
+    alert(msg);
+  }
+
+  // Add to cart
+  function addToCart(btn) {
+    btn.textContent = '✓ Добавлено';
+    btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+    setTimeout(() => {
+      btn.textContent = 'Купить';
+      btn.style.background = '';
+    }, 2000);
+  }
+
+  // Subscribe
+  function subscribeEmail(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.textContent = '✓ Подписка оформлена! Проверьте почту';
+    btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+    btn.disabled = true;
+  }
+
+  // Social proof notifications
+  const notifs = [
+    { name: 'Азамат', city: 'Алматы', action: 'купил курс ChatGPT' },
+    { name: 'Гульнара', city: 'Нур-Султан', action: 'начала курс по Midjourney' },
+    { name: 'Дамир', city: 'Шымкент', action: 'оформил подписку Про' },
+    { name: 'Айгуль', city: 'Алматы', action: 'заработала первые $100' },
+    { name: 'Нурлан', city: 'Актобе', action: 'получил сертификат' },
+    { name: 'Мадина', city: 'Ташкент', action: 'подключилась к партнёрской программе' },
+  ];
+  let notifIdx = 0;
+  function showNextNotif() {
+    const n = notifs[notifIdx % notifs.length];
+    document.getElementById('notif-text').innerHTML =
+      `<span class="notif-name">${n.name} из ${n.city}</span> только что ${n.action}`;
+    const el = document.getElementById('notification');
+    el.style.transform = 'translateX(0)';
+    el.style.transition = 'transform 0.4s ease';
+    notifIdx++;
+    setTimeout(() => {
+      el.style.transform = 'translateX(400px)';
+    }, 4000);
+  }
+  function closeNotif() {
+    document.getElementById('notification').style.transform = 'translateX(400px)';
+  }
+  setTimeout(() => {
+    showNextNotif();
+    setInterval(showNextNotif, 7000);
+  }, 3000);
+
+  // Mobile menu
+  function toggleMenu() {
+    alert('Мобильное меню: Возможности | Курсы | ИИ-инструменты | Цены | Войти');
+  }
+
+  // Smooth nav active states
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.background = window.scrollY > 50
+      ? 'rgba(15,15,26,0.97)'
+      : 'rgba(15,15,26,0.85)';
+  });
+</script>
+</body>
+</html>
